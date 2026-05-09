@@ -63,14 +63,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--d);color:var(--c);min-hei
 .feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--o),var(--om));opacity:0;transition:opacity .3s;}
 .feat-card:hover{background:rgba(255,255,255,.06);border-color:rgba(196,90,46,.3);transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.3);}
 .feat-card:hover::before{opacity:1;}
-.feat-card.full-pack{grid-column:span 3;display:flex;align-items:center;gap:32px;background:rgba(196,90,46,.06);border-color:rgba(196,90,46,.2);}
+.feat-card.full-pack{background:rgba(196,90,46,.06);border-color:rgba(196,90,46,.2);}
 .feat-card.full-pack:hover{background:rgba(196,90,46,.1);border-color:rgba(196,90,46,.45);}
 .feat-icon{font-size:28px;margin-bottom:14px;display:block;}
-.feat-card.full-pack .feat-icon{margin-bottom:0;font-size:36px;flex-shrink:0;}
+.feat-card.full-pack .feat-icon{font-size:28px;margin-bottom:14px;display:block;}
 .feat-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--c);letter-spacing:-.3px;margin-bottom:7px;}
-.feat-card.full-pack .feat-name{font-size:24px;}
+.feat-card.full-pack .feat-name{font-size:20px;}
 .feat-desc{font-size:12.5px;font-weight:300;color:rgba(250,249,245,.38);line-height:1.6;margin-bottom:14px;}
-.feat-card.full-pack .feat-desc{font-size:13.5px;color:rgba(250,249,245,.5);}
+.feat-card.full-pack .feat-desc{font-size:12.5px;color:rgba(250,249,245,.38);}
 .feat-time{font-family:'DM Mono',monospace;font-size:10px;color:rgba(250,249,245,.25);letter-spacing:1px;}
 .feat-card.full-pack .feat-time{margin-top:4px;}
 .feat-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
@@ -313,7 +313,7 @@ select.fi option{background:var(--d2);color:var(--c);}
 
 @media(max-width:900px){
   .feat-grid{grid-template-columns:1fr 1fr;}
-  .feat-card.full-pack{grid-column:span 2;}
+  .feat-card.full-pack{grid-column:span 1;}
 }
 @media(max-width:640px){
   #topnav{padding:0 18px;}
@@ -322,7 +322,7 @@ select.fi option{background:var(--d2);color:var(--c);}
   .home-hero{padding:40px 16px 32px;}
   .feat-grid{grid-template-columns:1fr;padding:0 16px;gap:10px;margin-top:28px;}
   .feat-card{padding:22px 20px;}
-  .feat-card.full-pack{grid-column:span 1;flex-direction:row;gap:18px;align-items:flex-start;}
+  .feat-card.full-pack{grid-column:span 1;}
   .feat-card.full-pack .feat-icon{font-size:28px;margin-bottom:0;flex-shrink:0;}
   .fg.c2,.fg.c3{grid-template-columns:1fr;}
   .fld.s2,.fld.s3{grid-column:1;}
@@ -653,14 +653,11 @@ select.fi option{background:var(--d2);color:var(--c);}
 
     <div class="feat-card full-pack" onclick="startFeature('full')">
       <span class="feat-icon">⚡</span>
-      <div>
-        <div class="feat-name">Full Funnel Package</div>
-        <div class="feat-desc">One intake. Everything out. Research, strategy, copy, video scripts, and creative brief — generated in parallel. What used to take a full workday now takes 8 minutes. This is the unfair advantage.</div>
-        <div class="feat-tags"><span class="feat-tag">All 5 Outputs</span><span class="feat-tag">One Intake</span><span class="feat-tag">Free First Session</span></div>
-        <div class="feat-time">~8 min</div>
-      </div>
+      <div class="feat-name">Full Funnel Package</div>
+      <div class="feat-desc">One intake. Everything out. Research, strategy, copy, video scripts, and creative brief — generated in parallel. What used to take a full workday now takes 8 minutes. This is the unfair advantage.</div>
+      <div class="feat-tags"><span class="feat-tag">All 5 Outputs</span><span class="feat-tag">One Intake</span><span class="feat-tag">Free First Session</span></div>
+      <div class="feat-time">~8 min</div>
     </div>
-  </div>
 
   <!-- ── BEFORE / AFTER ── -->
   <div class="bafa-section">
