@@ -1,0 +1,2153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fabro — Meta Ads OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@200;300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --c:#FAF9F5;--c2:#F0EDE4;
+  --o:#C45A2E;--om:#DA7756;--ol:#E8845A;--op:#F5C4A8;
+  --d:#141413;--d2:#1B1A18;--d3:#252320;--d4:#2E2C28;
+  --tx:#3A3530;--txm:#6A6058;--txl:#9E9488;
+  --brdd:rgba(250,249,245,.08);--ok:#3DAA6E;
+  --extracted:rgba(61,170,110,.15);--extracted-border:rgba(61,170,110,.35);
+  --inferred:rgba(224,144,64,.1);--inferred-border:rgba(224,144,64,.3);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:16px;}
+body{font-family:'DM Sans',sans-serif;background:var(--d);color:var(--c);min-height:100vh;overflow-x:hidden;}
+
+/* ── NAV ── */
+#topnav{position:sticky;top:0;z-index:200;background:rgba(20,20,19,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--brdd);padding:0 32px;height:60px;display:flex;align-items:center;gap:0;}
+.logo-row{display:flex;align-items:center;gap:10px;margin-right:24px;flex-shrink:0;text-decoration:none;cursor:pointer;}
+.logo-row svg{width:26px;height:26px;}
+.logo-text{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--c);}
+.logo-tagline{font-size:9px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:#DA7756;margin-top:-2px;}
+.logo-row{flex-direction:row;align-items:center;gap:10px;}
+.logo-text-wrap{display:flex;flex-direction:column;gap:0;}
+.nav-breadcrumb{display:flex;align-items:center;gap:8px;flex:1;overflow:hidden;}
+.nbc-home{font-size:12px;font-weight:300;color:rgba(250,249,245,.3);cursor:pointer;transition:color .2s;white-space:nowrap;}
+.nbc-home:hover{color:var(--ol);}
+.nbc-sep{color:rgba(250,249,245,.15);font-size:11px;flex-shrink:0;}
+.nbc-feature{font-size:12px;font-weight:300;color:rgba(250,249,245,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nbc-step{font-size:12px;font-weight:400;color:var(--c);white-space:nowrap;}
+.nav-right{display:flex;align-items:center;gap:12px;margin-left:auto;flex-shrink:0;}
+.nav-client-badge{background:rgba(196,90,46,.12);border:1px solid rgba(196,90,46,.25);border-radius:100px;padding:5px 14px;font-size:11px;font-weight:300;color:var(--ol);display:none;}
+.nav-client-badge.show{display:block;}
+
+/* ── PAGES ── */
+.page{display:none;min-height:calc(100vh - 60px);}
+.page.active{display:block;}
+.inner{max-width:820px;margin:0 auto;padding:52px 32px 80px;}
+.inner.wide{max-width:1060px;}
+
+/* ── HOME SCREEN ── */
+.home-hero{text-align:center;padding:64px 32px 48px;}
+.home-eyebrow{font-family:'DM Mono',monospace;font-size:10px;font-weight:300;letter-spacing:3px;text-transform:uppercase;color:rgba(218,119,86,.55);margin-bottom:14px;}
+.home-title{font-family:'Cormorant Garamond',serif;font-size:clamp(40px,6vw,72px);font-weight:700;letter-spacing:-2.5px;line-height:1.02;color:var(--c);margin-bottom:16px;}
+.home-title em{font-style:italic;font-weight:300;color:var(--ol);}
+.home-sub{font-size:15px;font-weight:300;color:rgba(250,249,245,.38);max-width:460px;margin:0 auto;line-height:1.75;}
+
+/* Feature cards grid */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:900px;margin:48px auto 0;padding:0 32px;}
+.feat-card{
+  background:rgba(255,255,255,.03);border:1.5px solid var(--brdd);
+  border-radius:16px;padding:28px 24px;
+  cursor:pointer;transition:all .3s cubic-bezier(.16,1,.3,1);
+  position:relative;overflow:hidden;
+}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--o),var(--om));opacity:0;transition:opacity .3s;}
+.feat-card:hover{background:rgba(255,255,255,.06);border-color:rgba(196,90,46,.3);transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.3);}
+.feat-card:hover::before{opacity:1;}
+.feat-card.full-pack{grid-column:span 3;display:flex;align-items:center;gap:32px;background:rgba(196,90,46,.06);border-color:rgba(196,90,46,.2);}
+.feat-card.full-pack:hover{background:rgba(196,90,46,.1);border-color:rgba(196,90,46,.45);}
+.feat-icon{font-size:28px;margin-bottom:14px;display:block;}
+.feat-card.full-pack .feat-icon{margin-bottom:0;font-size:36px;flex-shrink:0;}
+.feat-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--c);letter-spacing:-.3px;margin-bottom:7px;}
+.feat-card.full-pack .feat-name{font-size:24px;}
+.feat-desc{font-size:12.5px;font-weight:300;color:rgba(250,249,245,.38);line-height:1.6;margin-bottom:14px;}
+.feat-card.full-pack .feat-desc{font-size:13.5px;color:rgba(250,249,245,.5);}
+.feat-time{font-family:'DM Mono',monospace;font-size:10px;color:rgba(250,249,245,.25);letter-spacing:1px;}
+.feat-card.full-pack .feat-time{margin-top:4px;}
+.feat-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
+.feat-tag{font-size:9.5px;font-weight:400;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:rgba(196,90,46,.1);color:rgba(218,119,86,.7);}
+
+/* ── PAGE HEADERS ── */
+.pg-eyebrow{font-family:'DM Mono',monospace;font-size:10px;font-weight:300;letter-spacing:3px;text-transform:uppercase;color:rgba(218,119,86,.6);margin-bottom:10px;}
+.pg-title{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,5vw,54px);font-weight:700;letter-spacing:-1.8px;line-height:1.03;color:var(--c);margin-bottom:12px;}
+.pg-title em{font-style:italic;font-weight:300;color:var(--ol);}
+.pg-desc{font-size:14px;font-weight:300;color:rgba(250,249,245,.38);line-height:1.8;margin-bottom:36px;max-width:540px;}
+
+/* ── URL EXTRACTOR ── */
+.url-section{background:rgba(255,255,255,.03);border:1px solid var(--brdd);border-radius:14px;padding:24px;margin-bottom:20px;}
+.url-section-title{font-size:10.5px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:rgba(218,119,86,.55);margin-bottom:16px;}
+.url-row{display:flex;flex-direction:column;gap:10px;}
+.url-input-row{display:flex;align-items:center;gap:0;}
+.url-wrap{display:flex;align-items:center;background:rgba(255,255,255,.05);border:1.5px solid rgba(250,249,245,.1);border-radius:10px;overflow:hidden;transition:border-color .2s;flex:1;min-width:0;}
+.url-wrap:focus-within{border-color:rgba(218,119,86,.5);}
+.url-pre{padding:0 13px;font-size:11px;color:rgba(250,249,245,.28);font-family:'DM Mono',monospace;border-right:1px solid rgba(250,249,245,.08);height:48px;display:flex;align-items:center;flex-shrink:0;white-space:nowrap;}
+.url-wrap input{flex:1;min-width:0;background:transparent;border:none;padding:14px 13px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:var(--c);outline:none;width:100%;}
+.url-wrap input::placeholder{color:rgba(250,249,245,.2);}
+.url-btn-row{display:flex;gap:10px;}
+.btn-extract{background:var(--o);color:white;border:none;border-radius:8px;padding:13px 24px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;flex:1;}
+.btn-extract:hover{background:var(--om);}
+.btn-extract:disabled{opacity:.4;pointer-events:none;}
+.btn-skip-url{background:transparent;color:rgba(250,249,245,.4);border:1px solid rgba(250,249,245,.12);border-radius:8px;padding:13px 18px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;flex:1;}
+.btn-skip-url:hover{color:rgba(250,249,245,.7);border-color:rgba(250,249,245,.25);}
+
+/* Extraction result */
+.extract-result{margin-top:16px;display:none;}
+.extract-result.show{display:block;}
+.extract-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.extract-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:100px;font-size:11px;font-weight:300;}
+.ep-found{background:rgba(61,170,110,.1);border:1px solid rgba(61,170,110,.25);color:#5DCC8E;}
+.ep-partial{background:rgba(224,144,64,.1);border:1px solid rgba(224,144,64,.25);color:#E8A440;}
+.ep-missing{background:rgba(250,249,245,.05);border:1px solid rgba(250,249,245,.1);color:rgba(250,249,245,.4);}
+.extract-note{font-size:12px;font-weight:300;color:rgba(250,249,245,.32);line-height:1.6;font-style:italic;}
+
+/* ── ADAPTIVE FORM ── */
+.form-section{background:rgba(255,255,255,.03);border:1px solid var(--brdd);border-radius:14px;padding:24px;margin-bottom:16px;}
+.fs-title{font-size:10.5px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;color:rgba(218,119,86,.55);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--brdd);}
+.fg{display:grid;gap:13px;}
+.fg.c2{grid-template-columns:1fr 1fr;}
+.fld{display:flex;flex-direction:column;gap:6px;position:relative;}
+.fld.s2{grid-column:span 2;}
+
+/* Field states */
+.fld.extracted input.fi,.fld.extracted textarea.fi,.fld.extracted select.fi{background:var(--extracted);border-color:var(--extracted-border);}
+.fld.inferred input.fi,.fld.inferred textarea.fi{background:var(--inferred);border-color:var(--inferred-border);}
+
+.field-badge{position:absolute;top:0;right:0;font-size:9px;font-weight:400;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;display:flex;align-items:center;gap:4px;}
+.fb-extracted{background:rgba(61,170,110,.15);color:#5DCC8E;}
+.fb-inferred{background:rgba(224,144,64,.12);color:#E8A440;}
+.fb-required{background:rgba(196,90,46,.12);color:var(--ol);}
+
+label.lbl{font-size:10.5px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:var(--txl);}
+label.lbl span{color:rgba(218,119,86,.7);}
+input.fi,textarea.fi,select.fi{width:100%;padding:12px 15px;background:rgba(255,255,255,.05);border:1.5px solid rgba(250,249,245,.09);border-radius:8px;outline:none;font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:300;color:var(--c);transition:border-color .2s,background .2s;-webkit-appearance:none;resize:vertical;}
+input.fi:focus,textarea.fi:focus,select.fi:focus{border-color:rgba(218,119,86,.5);background:rgba(255,255,255,.07);}
+input.fi::placeholder,textarea.fi::placeholder{color:rgba(250,249,245,.2);}
+textarea.fi{min-height:85px;line-height:1.6;}
+select.fi option{background:var(--d2);color:var(--c);}
+
+/* Extracted fields collapsible */
+.extracted-review{background:rgba(61,170,110,.05);border:1px solid rgba(61,170,110,.15);border-radius:10px;margin-bottom:16px;overflow:hidden;}
+.extracted-review-hd{padding:12px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .2s;}
+.extracted-review-hd:hover{background:rgba(61,170,110,.08);}
+.er-title{font-size:11px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:#5DCC8E;display:flex;align-items:center;gap:8px;}
+.er-chev{font-size:11px;color:rgba(93,204,142,.5);transition:transform .25s;}
+.extracted-review-hd.open .er-chev{transform:rotate(180deg);}
+.extracted-body{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.16,1,.3,1);}
+.extracted-body.open{max-height:600px;}
+.extracted-fields{padding:4px 18px 16px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ef-item{display:flex;flex-direction:column;gap:3px;}
+.ef-label{font-size:9.5px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:rgba(250,249,245,.3);}
+.ef-value{font-size:13px;font-weight:300;color:rgba(250,249,245,.65);line-height:1.5;}
+.ef-edit{font-size:10px;color:rgba(93,204,142,.5);cursor:pointer;margin-top:2px;display:inline-block;}
+.ef-edit:hover{color:#5DCC8E;}
+
+/* ── RADIO CARDS ── */
+.rc-grid{display:grid;gap:8px;}
+.rc-grid.c2{grid-template-columns:1fr 1fr;}
+.rc{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;background:rgba(255,255,255,.03);border:1.5px solid var(--brdd);border-radius:10px;cursor:pointer;transition:all .2s;}
+.rc:hover{background:rgba(196,90,46,.07);border-color:rgba(196,90,46,.25);}
+.rc.on{background:rgba(196,90,46,.1);border-color:rgba(196,90,46,.45);}
+.rc-dot{width:15px;height:15px;border-radius:50%;border:1.5px solid rgba(250,249,245,.22);flex-shrink:0;margin-top:3px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.rc.on .rc-dot{border-color:var(--o);}
+.rc.on .rc-dot::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--o);}
+.rc-info{flex:1;}
+.rc-label{font-size:13.5px;font-weight:400;color:rgba(250,249,245,.75);}
+.rc-sub{font-size:11.5px;font-weight:300;color:rgba(250,249,245,.32);margin-top:2px;}
+
+/* ── BUTTONS ── */
+.btn-row{display:flex;align-items:center;gap:12px;margin-top:28px;padding-top:28px;border-top:1px solid var(--brdd);flex-wrap:wrap;}
+.btn-row.right{justify-content:flex-end;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:8px;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;letter-spacing:1.8px;text-transform:uppercase;cursor:pointer;transition:all .22s;white-space:nowrap;}
+.btn-p{background:var(--o);color:white;}
+.btn-p:hover{background:var(--om);transform:translateY(-1px);box-shadow:0 10px 32px rgba(196,90,46,.3);}
+.btn-p:disabled{opacity:.35;pointer-events:none;transform:none;box-shadow:none;}
+.btn-g{background:rgba(255,255,255,.06);color:rgba(250,249,245,.55);border:1px solid var(--brdd);}
+.btn-g:hover{background:rgba(255,255,255,.1);color:var(--c);}
+.btn-dl{background:rgba(61,170,110,.1);color:#5DCC8E;border:1px solid rgba(61,170,110,.25);}
+.btn-dl:hover{background:rgba(61,170,110,.18);}
+.btn-sm{padding:9px 18px;font-size:11px;}
+.spacer{flex:1;}
+
+/* ── LOADING ── */
+#loadOverlay{position:fixed;inset:0;background:rgba(20,20,19,.97);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:500;}
+#loadOverlay.on{display:flex;}
+.lo-orb{width:72px;height:72px;border-radius:50%;background:rgba(196,90,46,.1);border:1px solid rgba(196,90,46,.2);display:flex;align-items:center;justify-content:center;margin-bottom:24px;animation:orbp 2s ease-in-out infinite;}
+@keyframes orbp{0%,100%{box-shadow:0 0 0 0 rgba(196,90,46,.3)}50%{box-shadow:0 0 0 18px rgba(196,90,46,0)}}
+.lo-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--c);letter-spacing:-1px;margin-bottom:8px;text-align:center;}
+.lo-sub{font-size:13px;font-weight:300;color:rgba(250,249,245,.35);margin-bottom:32px;text-align:center;max-width:360px;line-height:1.65;}
+.lo-steps{display:flex;flex-direction:column;gap:8px;width:340px;}
+.lo-step{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--brdd);border-radius:8px;transition:all .4s;}
+.lo-step.cur{background:rgba(196,90,46,.08);border-color:rgba(196,90,46,.25);}
+.lo-step.ok{background:rgba(61,170,110,.06);border-color:rgba(61,170,110,.2);}
+.lo-dot{width:7px;height:7px;border-radius:50%;background:rgba(250,249,245,.15);flex-shrink:0;transition:background .3s;}
+.lo-step.cur .lo-dot{background:var(--ol);animation:orbp 1.2s infinite;}
+.lo-step.ok .lo-dot{background:#5DCC8E;animation:none;}
+.lo-txt{font-size:12.5px;font-weight:300;color:rgba(250,249,245,.35);transition:color .3s;}
+.lo-step.cur .lo-txt{color:rgba(250,249,245,.75);}
+.lo-step.ok .lo-txt{color:rgba(93,204,142,.65);}
+
+/* ── OUTPUT COMPONENTS ── */
+.acc{background:rgba(255,255,255,.025);border:1px solid var(--brdd);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.acc-hd{padding:15px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .2s;}
+.acc-hd:hover{background:rgba(255,255,255,.02);}
+.acc-hd.open{background:rgba(196,90,46,.05);}
+.acc-hd-l{display:flex;align-items:center;gap:12px;}
+.acc-ico{width:30px;height:30px;border-radius:8px;background:rgba(196,90,46,.12);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.acc-title{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;color:var(--c);letter-spacing:-.2px;}
+.acc-chev{color:rgba(250,249,245,.3);font-size:11px;transition:transform .25s;}
+.acc-hd.open .acc-chev{transform:rotate(180deg);}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1);}
+.acc-body.open{max-height:4000px;}
+.acc-cnt{padding:4px 20px 20px;}
+.rt{font-size:13.5px;font-weight:300;color:rgba(250,249,245,.6);line-height:1.85;}
+.rt p{margin-bottom:11px;}
+.rt p:last-child{margin-bottom:0;}
+.rt strong{color:var(--ol);font-weight:400;}
+.rt ul{padding-left:18px;margin:10px 0;display:flex;flex-direction:column;gap:5px;}
+.rt li{color:rgba(250,249,245,.55);}
+.rt h4{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--c);margin:14px 0 7px;}
+.rt table{width:100%;border-collapse:collapse;margin:12px 0;}
+.rt th{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:rgba(218,119,86,.6);padding:8px 12px;border-bottom:1px solid var(--brdd);text-align:left;}
+.rt td{font-size:13px;color:rgba(250,249,245,.55);padding:9px 12px;border-bottom:1px solid rgba(250,249,245,.04);}
+.trig{background:rgba(196,90,46,.07);border:1px solid rgba(196,90,46,.18);border-radius:10px;padding:13px 16px;margin-bottom:8px;font-size:13.5px;font-weight:300;color:rgba(250,249,245,.75);line-height:1.7;font-style:italic;border-left:3px solid var(--o);}
+.hook{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.04);border:1px solid var(--brdd);border-radius:8px;padding:11px 13px;margin-bottom:7px;}
+.hook-tag{background:rgba(196,90,46,.15);border-radius:4px;padding:3px 8px;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ol);flex-shrink:0;margin-top:1px;}
+.hook-text{font-size:13px;font-weight:300;color:rgba(250,249,245,.65);line-height:1.55;}
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0;}
+.mc{background:rgba(255,255,255,.04);border:1px solid var(--brdd);border-radius:10px;padding:13px;text-align:center;}
+.mc-v{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--ol);display:block;line-height:1;}
+.mc-l{font-size:10px;font-weight:300;color:rgba(250,249,245,.3);margin-top:4px;display:block;}
+.sb{background:rgba(255,255,255,.03);border:1px solid var(--brdd);border-radius:12px;padding:20px;margin-bottom:12px;}
+.sb-hd{display:flex;align-items:center;gap:12px;margin-bottom:13px;padding-bottom:11px;border-bottom:1px solid var(--brdd);}
+.sb-num{width:28px;height:28px;border-radius:7px;background:rgba(196,90,46,.12);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--ol);flex-shrink:0;}
+.sb-ttl{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--c);letter-spacing:-.3px;}
+.sb-body{font-size:13.5px;font-weight:300;color:rgba(250,249,245,.6);line-height:1.85;}
+.sb-body strong{color:var(--ol);font-weight:400;}
+.sb-body ul{padding-left:17px;margin:10px 0;display:flex;flex-direction:column;gap:5px;}
+.sb-body li{color:rgba(250,249,245,.55);}
+.sb-body table{width:100%;border-collapse:collapse;margin:11px 0;}
+.sb-body th{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:rgba(218,119,86,.6);padding:8px 12px;border-bottom:1px solid var(--brdd);text-align:left;}
+.sb-body td{font-size:13px;color:rgba(250,249,245,.55);padding:9px 12px;border-bottom:1px solid rgba(250,249,245,.04);}
+.bench{background:rgba(224,144,64,.08);border:1px solid rgba(224,144,64,.2);border-radius:12px;padding:16px;margin:14px 0;}
+.bench-t{font-size:10px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:#E8A440;margin-bottom:12px;}
+.bench-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.bench-item{text-align:center;}
+.bench-v{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:#E8A440;display:block;}
+.bench-l{font-size:10px;font-weight:300;color:rgba(224,144,64,.55);margin-top:3px;}
+.warn{background:rgba(224,144,64,.08);border:1px solid rgba(224,144,64,.2);border-radius:10px;padding:12px 15px;margin:10px 0;font-size:13px;font-weight:300;color:rgba(224,144,64,.8);line-height:1.65;}
+.info-box{background:rgba(127,184,238,.08);border:1px solid rgba(127,184,238,.2);border-radius:10px;padding:13px 16px;margin-bottom:14px;font-size:13px;font-weight:300;color:rgba(127,184,238,.85);line-height:1.65;}
+
+/* Copy cards */
+.ftabs{display:flex;gap:4px;background:rgba(255,255,255,.03);border:1px solid var(--brdd);border-radius:10px;padding:4px;margin-bottom:20px;flex-wrap:wrap;}
+.ftab{padding:9px 16px;border-radius:7px;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:300;color:rgba(250,249,245,.38);cursor:pointer;transition:all .2s;background:none;white-space:nowrap;}
+.ftab.on{background:var(--o);color:white;font-weight:400;}
+.ftab:hover:not(.on){color:rgba(250,249,245,.7);}
+.fbadge{display:inline-flex;align-items:center;gap:6px;padding:4px 13px;border-radius:100px;margin-bottom:12px;font-size:9.5px;font-weight:400;letter-spacing:2px;text-transform:uppercase;}
+.f-tof{background:rgba(196,90,46,.12);border:1px solid rgba(196,90,46,.25);color:var(--ol);}
+.f-mof{background:rgba(61,130,200,.12);border:1px solid rgba(61,130,200,.25);color:#7FB8EE;}
+.f-bof{background:rgba(61,170,110,.12);border:1px solid rgba(61,170,110,.25);color:#5DCC8E;}
+.cc{background:rgba(255,255,255,.03);border:1px solid var(--brdd);border-radius:12px;margin-bottom:11px;overflow:hidden;}
+.cc-hd{padding:11px 17px;border-bottom:1px solid var(--brdd);display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.02);flex-wrap:wrap;gap:7px;}
+.cc-angle{font-size:10px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--ol);}
+.cc-type{font-size:11px;font-weight:300;color:rgba(250,249,245,.3);}
+.cc-body{padding:17px;}
+.cc-part{margin-bottom:13px;}
+.cc-part:last-child{margin-bottom:0;}
+.cc-pl{font-size:9px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(250,249,245,.26);margin-bottom:5px;display:block;}
+.cc-pv{font-size:13.5px;font-weight:300;color:rgba(250,249,245,.75);line-height:1.75;}
+.cc-foot{padding:9px 17px;border-top:1px solid var(--brdd);display:flex;gap:7px;}
+.iac{background:rgba(255,255,255,.03);border:1px solid var(--brdd);border-radius:11px;margin-bottom:9px;overflow:hidden;}
+.iac-hd{padding:9px 15px;border-bottom:1px solid var(--brdd);background:rgba(255,255,255,.02);display:flex;align-items:center;justify-content:space-between;}
+.iac-angle{font-size:9px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--ol);}
+.iac-stage{font-size:9.5px;color:rgba(250,249,245,.3);}
+.iac-body{padding:14px 15px;display:flex;flex-direction:column;gap:3px;}
+.iac-line{font-size:14px;font-weight:400;color:rgba(250,249,245,.8);line-height:1.5;}
+.vsc{background:rgba(255,255,255,.03);border:1px solid var(--brdd);border-radius:12px;margin-bottom:13px;overflow:hidden;}
+.vsc-hd{padding:13px 17px;border-bottom:1px solid var(--brdd);background:rgba(255,255,255,.02);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.vsc-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--c);letter-spacing:-.2px;}
+.vsc-meta{display:flex;align-items:center;gap:8px;}
+.vsc-dur{font-size:11px;color:rgba(250,249,245,.32);}
+.vsc-body{padding:17px;display:flex;flex-direction:column;}
+.vsc-beat{border-bottom:1px solid var(--brdd);padding:12px 0;}
+.vsc-beat:last-child{border-bottom:none;}
+.vsc-beat-label{font-size:9px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(218,119,86,.5);margin-bottom:7px;display:block;}
+.vsc-spoken{font-size:13.5px;font-weight:300;color:rgba(250,249,245,.75);line-height:1.7;margin-bottom:5px;}
+.vsc-direction{font-size:12px;font-weight:300;color:rgba(250,249,245,.33);line-height:1.6;font-style:italic;}
+.vsc-onscreen{font-size:11.5px;font-family:'DM Mono',monospace;color:var(--ol);background:rgba(196,90,46,.07);border-radius:5px;padding:4px 9px;display:inline-block;margin-top:3px;}
+.brief-table{width:100%;border-collapse:collapse;margin:11px 0;}
+.brief-table th{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:rgba(218,119,86,.6);padding:9px 13px;border-bottom:1px solid var(--brdd);text-align:left;}
+.brief-table td{font-size:13px;color:rgba(250,249,245,.6);padding:9px 13px;border-bottom:1px solid rgba(250,249,245,.04);line-height:1.45;}
+.brief-table tr:last-child td{border-bottom:none;}
+.stage-tof{color:var(--ol);}
+.stage-mof{color:#7FB8EE;}
+.stage-bof{color:#5DCC8E;}
+
+/* ── WHAT'S NEXT ── */
+.wnext{margin-top:40px;padding-top:32px;border-top:1px solid var(--brdd);}
+.wnext-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--c);letter-spacing:-.5px;margin-bottom:6px;}
+.wnext-sub{font-size:13px;font-weight:300;color:rgba(250,249,245,.35);margin-bottom:20px;}
+.wnext-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.wnext-card{background:rgba(255,255,255,.03);border:1.5px solid var(--brdd);border-radius:12px;padding:18px 16px;cursor:pointer;transition:all .25s;}
+.wnext-card:hover{background:rgba(196,90,46,.07);border-color:rgba(196,90,46,.3);transform:translateY(-2px);}
+.wnc-icon{font-size:22px;margin-bottom:10px;display:block;}
+.wnc-name{font-size:14px;font-weight:500;color:var(--c);margin-bottom:5px;}
+.wnc-desc{font-size:12px;font-weight:300;color:rgba(250,249,245,.35);line-height:1.5;}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;right:24px;z-index:1000;background:var(--d2);border:1px solid var(--brdd);border-radius:10px;padding:12px 17px;font-size:13px;font-weight:300;color:var(--c);display:flex;align-items:center;gap:9px;transform:translateY(20px);opacity:0;transition:all .3s;pointer-events:none;}
+#toast.on{transform:translateY(0);opacity:1;}
+.toast-d{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.toast-d.ok{background:var(--ok);}
+.toast-d.err{background:#D94A3A;}
+.toast-d.info{background:var(--ol);}
+
+
+@media(max-width:900px){
+  .feat-grid{grid-template-columns:1fr 1fr;}
+  .feat-card.full-pack{grid-column:span 2;}
+}
+@media(max-width:640px){
+  #topnav{padding:0 18px;}
+  .nbc-feature,.nbc-step{display:none;}
+  .inner{padding:28px 16px 60px;}
+  .home-hero{padding:40px 16px 32px;}
+  .feat-grid{grid-template-columns:1fr;padding:0 16px;gap:10px;margin-top:28px;}
+  .feat-card{padding:22px 20px;}
+  .feat-card.full-pack{grid-column:span 1;flex-direction:row;gap:18px;align-items:flex-start;}
+  .feat-card.full-pack .feat-icon{font-size:28px;margin-bottom:0;flex-shrink:0;}
+  .fg.c2,.fg.c3{grid-template-columns:1fr;}
+  .fld.s2,.fld.s3{grid-column:1;}
+  .wnext-cards{grid-template-columns:1fr;}
+  .rc-grid.c2{grid-template-columns:1fr;}
+  .extracted-fields{grid-template-columns:1fr;}
+
+  .btn-row{gap:8px;}
+  .btn{padding:12px 18px;font-size:11px;letter-spacing:1.2px;}
+  .crc-body{grid-template-columns:1fr;}
+  .cf.s2{grid-column:1;}
+  .mg,.bench-g{grid-template-columns:1fr 1fr;}
+  .ftabs{gap:3px;}
+  .ftab{padding:8px 12px;font-size:11px;}
+}
+/* ── BEFORE / AFTER SECTION ── */
+.bafa-section{padding:80px 32px;background:var(--d2);border-top:1px solid var(--brdd);}
+.bafa-inner{max-width:900px;margin:0 auto;}
+.bafa-eyebrow{font-family:'DM Mono',monospace;font-size:10px;font-weight:300;letter-spacing:3px;text-transform:uppercase;color:rgba(218,119,86,.55);text-align:center;margin-bottom:12px;}
+.bafa-title{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,46px);font-weight:700;letter-spacing:-1.5px;color:var(--c);text-align:center;margin-bottom:8px;}
+.bafa-title em{font-style:italic;font-weight:300;color:var(--ol);}
+.bafa-sub{font-size:14px;font-weight:300;color:rgba(250,249,245,.38);text-align:center;margin-bottom:48px;line-height:1.7;}
+.bafa-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;border-radius:16px;overflow:hidden;border:1px solid var(--brdd);}
+.bafa-col{padding:32px 28px;}
+.bafa-col.before{background:rgba(217,74,58,.06);}
+.bafa-col.after{background:rgba(61,170,110,.06);}
+.bafa-col-head{display:flex;align-items:center;gap:10px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(250,249,245,.06);}
+.bafa-col-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.bafa-col-icon.x{background:rgba(217,74,58,.15);}
+.bafa-col-icon.ok{background:rgba(61,170,110,.15);}
+.bafa-col-label{font-size:11px;font-weight:400;letter-spacing:2.5px;text-transform:uppercase;}
+.bafa-col-label.x{color:rgba(217,74,58,.7);}
+.bafa-col-label.ok{color:rgba(61,170,110,.7);}
+.bafa-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(250,249,245,.04);}
+.bafa-item:last-child{border-bottom:none;}
+.bafa-dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px;}
+.bafa-dot.x{background:rgba(217,74,58,.15);color:#D94A3A;}
+.bafa-dot.ok{background:rgba(61,170,110,.15);color:#3DAA6E;}
+.bafa-item-text{font-size:13.5px;font-weight:300;line-height:1.55;}
+.bafa-item-text.x{color:rgba(250,249,245,.5);}
+.bafa-item-text.ok{color:rgba(250,249,245,.75);}
+
+/* ── OUTCOME SECTION ── */
+.outcome-section{padding:80px 32px;background:var(--d);border-top:1px solid var(--brdd);}
+.outcome-inner{max-width:900px;margin:0 auto;}
+.outcome-eyebrow{font-family:'DM Mono',monospace;font-size:10px;font-weight:300;letter-spacing:3px;text-transform:uppercase;color:rgba(218,119,86,.55);text-align:center;margin-bottom:12px;}
+.outcome-title{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,46px);font-weight:700;letter-spacing:-1.5px;color:var(--c);text-align:center;margin-bottom:8px;}
+.outcome-title em{font-style:italic;font-weight:300;color:var(--ol);}
+.outcome-sub{font-size:14px;font-weight:300;color:rgba(250,249,245,.38);text-align:center;margin-bottom:48px;line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto;}
+.outcome-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;}
+.outcome-card{background:rgba(255,255,255,.03);border:1px solid var(--brdd);border-radius:14px;padding:28px 22px;text-align:center;transition:all .3s;}
+.outcome-card:hover{background:rgba(196,90,46,.06);border-color:rgba(196,90,46,.25);transform:translateY(-3px);}
+.outcome-num{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:700;color:var(--ol);letter-spacing:-2px;line-height:1;display:block;margin-bottom:8px;}
+.outcome-label{font-size:13px;font-weight:400;color:var(--c);margin-bottom:6px;}
+.outcome-desc{font-size:12px;font-weight:300;color:rgba(250,249,245,.35);line-height:1.55;}
+.outcome-quote{background:rgba(196,90,46,.07);border:1px solid rgba(196,90,46,.18);border-radius:12px;padding:28px 32px;border-left:3px solid var(--o);}
+.outcome-quote-text{font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.5vw,26px);font-style:italic;font-weight:300;color:rgba(250,249,245,.8);line-height:1.5;margin-bottom:16px;}
+.outcome-quote-text strong{font-style:normal;font-weight:600;color:var(--c);}
+.outcome-quote-attr{font-size:11px;font-weight:300;letter-spacing:2px;text-transform:uppercase;color:rgba(250,249,245,.3);}
+
+/* ── SOCIAL FOOTER ── */
+.social-footer{padding:40px 32px 48px;background:var(--d);border-top:1px solid var(--brdd);display:flex;flex-direction:column;align-items:center;gap:20px;}
+.social-footer-logo{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.sfl-text{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:rgba(250,249,245,.6);letter-spacing:-.5px;}
+.social-footer-tagline{font-size:11px;font-weight:300;letter-spacing:3px;text-transform:uppercase;color:rgba(250,249,245,.2);}
+.social-links{display:flex;align-items:center;gap:14px;}
+.social-link{display:flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(255,255,255,.04);border:1px solid var(--brdd);border-radius:100px;text-decoration:none;transition:all .25s;}
+.social-link:hover{background:rgba(196,90,46,.1);border-color:rgba(196,90,46,.35);transform:translateY(-2px);}
+.social-link svg{width:18px;height:18px;flex-shrink:0;}
+.social-link-name{font-size:12px;font-weight:300;color:rgba(250,249,245,.55);letter-spacing:.5px;}
+.social-link:hover .social-link-name{color:var(--ol);}
+.social-footer-copy{font-size:11px;font-weight:300;color:rgba(250,249,245,.15);letter-spacing:.5px;}
+
+@media(max-width:640px){
+  .bafa-grid{grid-template-columns:1fr;}
+  .outcome-grid{grid-template-columns:1fr 1fr;}
+  .social-links{flex-direction:column;gap:10px;}
+  .bafa-section,.outcome-section{padding:56px 16px;}
+  .social-footer{padding:32px 16px 40px;}
+}
+@media(max-width:400px){
+  .outcome-grid{grid-template-columns:1fr;}
+}
+/* ── LEAD GATE MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(10,10,9,.92);
+  backdrop-filter:blur(12px);z-index:800;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;opacity:0;transition:opacity .35s;pointer-events:none;
+}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal-box{
+  background:var(--d2);border:1px solid var(--brdd);border-radius:20px;
+  padding:44px 40px;width:100%;max-width:480px;
+  transform:translateY(24px);transition:transform .35s cubic-bezier(.16,1,.3,1);
+}
+.modal-overlay.show .modal-box{transform:translateY(0);}
+.modal-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;}
+.modal-logo svg{width:28px;height:28px;}
+.modal-logo-text{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--c);}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:clamp(24px,4vw,34px);font-weight:700;letter-spacing:-1px;color:var(--c);margin-bottom:8px;line-height:1.1;}
+.modal-title em{font-style:italic;font-weight:300;color:var(--ol);}
+.modal-desc{font-size:13.5px;font-weight:300;color:rgba(250,249,245,.4);line-height:1.7;margin-bottom:28px;}
+.modal-fields{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
+.modal-field{display:flex;flex-direction:column;gap:6px;}
+.modal-label{font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;color:var(--txl);}
+.modal-input{width:100%;padding:13px 16px;background:rgba(255,255,255,.05);border:1.5px solid rgba(250,249,245,.09);border-radius:8px;outline:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:var(--c);transition:border-color .2s;}
+.modal-input:focus{border-color:rgba(218,119,86,.5);}
+.modal-input::placeholder{color:rgba(250,249,245,.2);}
+.modal-submit{width:100%;padding:15px;background:var(--o);color:white;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:400;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-bottom:12px;}
+.modal-submit:hover{background:var(--om);transform:translateY(-1px);box-shadow:0 10px 32px rgba(196,90,46,.3);}
+.modal-privacy{font-size:11px;font-weight:300;color:rgba(250,249,245,.2);text-align:center;line-height:1.5;}
+
+/* ── PAYMENT MODAL ── */
+.pay-modal-box{max-width:440px;}
+.pay-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(196,90,46,.1);border:1px solid rgba(196,90,46,.25);border-radius:100px;padding:5px 14px;margin-bottom:20px;}
+.pay-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--ol);}
+.pay-badge-text{font-size:10px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:var(--ol);}
+.pay-price{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:700;color:var(--c);letter-spacing:-3px;line-height:1;margin-bottom:4px;}
+.pay-price sup{font-size:28px;letter-spacing:0;vertical-align:super;}
+.pay-price-note{font-size:12px;font-weight:300;color:rgba(250,249,245,.3);margin-bottom:24px;}
+.pay-includes{background:rgba(255,255,255,.03);border:1px solid var(--brdd);border-radius:10px;padding:16px 18px;margin-bottom:22px;}
+.pay-includes-title{font-size:9.5px;font-weight:400;letter-spacing:2px;text-transform:uppercase;color:rgba(250,249,245,.3);margin-bottom:12px;}
+.pay-item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;font-weight:300;color:rgba(250,249,245,.65);}
+.pay-item-dot{width:18px;height:18px;border-radius:50%;background:rgba(61,170,110,.12);display:flex;align-items:center;justify-content:center;font-size:10px;color:#3DAA6E;flex-shrink:0;}
+.pay-btn{width:100%;padding:16px;background:var(--o);color:white;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .22s;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;}
+.pay-btn:hover{background:var(--om);transform:translateY(-1px);box-shadow:0 12px 36px rgba(196,90,46,.35);}
+.pay-secure{font-size:11px;font-weight:300;color:rgba(250,249,245,.22);text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;}
+.modal-close{position:absolute;top:18px;right:20px;background:none;border:none;color:rgba(250,249,245,.3);font-size:20px;cursor:pointer;line-height:1;padding:4px 8px;transition:color .2s;}
+.modal-close:hover{color:rgba(250,249,245,.7);}
+.modal-box{position:relative;}
+
+/* Lock overlay on Full Funnel card */
+.feat-card.locked-card{position:relative;overflow:hidden;}
+.lock-banner{position:absolute;top:12px;right:12px;background:var(--o);color:white;border-radius:100px;padding:4px 12px;font-size:10px;font-weight:400;letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:5px;}
+.lock-banner svg{width:10px;height:10px;}
+
+@media(max-width:480px){
+  .modal-box{padding:32px 22px;}
+  .pay-price{font-size:52px;}
+}
+.cta-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--o);color:white;border:none;
+  padding:18px 40px;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;
+  letter-spacing:2px;text-transform:uppercase;cursor:pointer;
+  transition:all .25s;margin-top:28px;
+}
+.cta-btn:hover{background:var(--om);transform:translateY(-2px);box-shadow:0 14px 44px rgba(196,90,46,.38);}
+.cta-btn-ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;color:rgba(250,249,245,.55);
+  border:1px solid rgba(250,249,245,.15);
+  padding:16px 32px;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:300;
+  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
+  transition:all .22s;margin-top:28px;margin-left:12px;
+}
+.cta-btn-ghost:hover{border-color:rgba(196,90,46,.4);color:var(--ol);}
+.cta-row{display:flex;align-items:center;flex-wrap:wrap;gap:0;}
+.bafa-cta{text-align:center;margin-top:36px;}
+.outcome-cta{text-align:center;margin-top:36px;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     LEAD GATE MODAL
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="leadModal">
+  <div class="modal-box">
+    <div class="modal-logo">
+      <svg viewBox="-8 -8 116 116" fill="none">
+        <defs><linearGradient id="lgm" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C45A2E"/><stop offset="100%" stop-color="#E8845A"/></linearGradient></defs>
+        <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lgm)" transform="rotate(0,50,50)"/>
+        <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lgm)" opacity=".75" transform="rotate(45,50,50)"/>
+        <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lgm)" opacity=".55" transform="rotate(90,50,50)"/>
+        <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lgm)" opacity=".38" transform="rotate(135,50,50)"/>
+        <circle cx="50" cy="50" r="9" fill="rgba(250,249,245,.12)"/>
+        <circle cx="50" cy="50" r="4" fill="url(#lgm)"/>
+      </svg>
+      <span class="modal-logo-text">Fabro</span>
+    </div>
+    <h2 class="modal-title">Claim your<br/><em>free trial.</em></h2>
+    <p class="modal-desc" id="leadModalDesc">All 6 tools. Your first session is completely on us. No credit card. Enter your details and start building campaigns that actually convert — right now.</p>
+    <div class="modal-fields">
+      <div class="modal-field">
+        <label class="modal-label">Full Name</label>
+        <input class="modal-input" id="lead_name" type="text" placeholder="Your full name"/>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Phone Number</label>
+        <input class="modal-input" id="lead_phone" type="tel" placeholder="+1 234 567 8900"/>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Email Address</label>
+        <input class="modal-input" id="lead_email" type="email" placeholder="you@youragency.com"/>
+      </div>
+    </div>
+    <button class="modal-submit" onclick="submitLead()">Claim Free Trial →</button>
+    <p class="modal-privacy">No spam. No credit card required. First session completely free.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SUBSCRIPTION MODAL — shown after first free session
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal-box pay-modal-box">
+    <button class="modal-close" onclick="closePayModal()">✕</button>
+    <div class="pay-badge"><span class="pay-badge-dot"></span><span class="pay-badge-text">Your Free Session Is Complete</span></div>
+    <h2 class="modal-title" style="margin-bottom:6px;">Keep building.<br/><em>Subscribe to continue.</em></h2>
+    <p style="font-size:13px;font-weight:300;color:rgba(250,249,245,.4);line-height:1.7;margin-bottom:20px;">You've seen what Fabro does. Now make it part of every client workflow — unlimited sessions, all 6 tools, one simple monthly price.</p>
+    <div class="pay-price"><sup>$</sup>19<span style="font-size:22px;font-weight:300;letter-spacing:0;color:rgba(250,249,245,.45)">/mo</span></div>
+    <div class="pay-price-note">Cancel anytime · No hidden fees · Instant access</div>
+    <div class="pay-includes">
+      <div class="pay-includes-title">Everything included — unlimited</div>
+      <div class="pay-item"><div class="pay-item-dot">✓</div>All 6 tools — unlimited sessions, unlimited clients</div>
+      <div class="pay-item"><div class="pay-item-dot">✓</div>Market Research — competitor ads + customer language</div>
+      <div class="pay-item"><div class="pay-item-dot">✓</div>Ad Strategy — benchmarks, structure, 30-day roadmap</div>
+      <div class="pay-item"><div class="pay-item-dot">✓</div>Ad Copy &amp; Scripts — hooks, image ads, video scripts</div>
+      <div class="pay-item"><div class="pay-item-dot">✓</div>Creative Brief — 15 themes, designer-ready</div>
+      <div class="pay-item"><div class="pay-item-dot">✓</div>Full Funnel Package — everything in 8 minutes</div>
+    </div>
+    <button class="pay-btn" onclick="goToStripe()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="white" opacity=".85"><path d="M12 1L3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4z"/></svg>
+      Start Subscription — $19/month →
+    </button>
+    <div class="pay-secure">🔒 Secured by Stripe · Enter card details once · Never charged again without notice</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="topnav">
+  <div class="logo-row" onclick="goHome()">
+    <svg viewBox="-8 -8 116 116" fill="none">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C45A2E"/><stop offset="100%" stop-color="#E8845A"/></linearGradient></defs>
+      <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lg)" transform="rotate(0,50,50)"/>
+      <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lg)" opacity=".75" transform="rotate(45,50,50)"/>
+      <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lg)" opacity=".55" transform="rotate(90,50,50)"/>
+      <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lg)" opacity=".38" transform="rotate(135,50,50)"/>
+      <circle cx="50" cy="50" r="11" fill="rgba(250,249,245,.15)"/>
+      <circle cx="50" cy="50" r="5" fill="url(#lg)"/>
+    </svg>
+    <div class="logo-text-wrap">
+      <span class="logo-text">Fabro</span>
+      <span class="logo-tagline">Craft Your Fortune</span>
+    </div>
+  </div>
+  <div class="nav-breadcrumb" id="navBread"></div>
+  <div class="nav-right">
+    <div class="nav-client-badge" id="clientBadge"></div>
+  </div>
+</nav>
+
+<!-- LOADING -->
+<div id="loadOverlay">
+  <div class="lo-orb">
+    <svg width="34" height="34" viewBox="-8 -8 116 116" fill="none">
+      <rect x="43" y="6" width="14" height="44" rx="7" fill="#C45A2E" transform="rotate(0,50,50)"/>
+      <rect x="43" y="6" width="14" height="44" rx="7" fill="#DA7756" opacity=".7" transform="rotate(45,50,50)"/>
+      <rect x="43" y="6" width="14" height="44" rx="7" fill="#C45A2E" opacity=".5" transform="rotate(90,50,50)"/>
+      <rect x="43" y="6" width="14" height="44" rx="7" fill="#DA7756" opacity=".35" transform="rotate(135,50,50)"/>
+    </svg>
+  </div>
+  <div class="lo-title" id="loTitle">Working on it…</div>
+  <div class="lo-sub" id="loSub">Fabro is generating your materials.</div>
+  <div class="lo-steps" id="loSteps"></div>
+</div>
+
+<div id="toast"><div class="toast-d ok" id="toastDot"></div><span id="toastMsg">Done</span></div>
+
+<!-- ══════════════════════════════════════
+     P0: HOME
+══════════════════════════════════════ -->
+<div class="page active" id="p0">
+  <div class="home-hero">
+    <div class="home-eyebrow">For Performance Marketers Who Refuse Average</div>
+    <h1 class="home-title">8 hours of campaign prep.<br/>Done in <em>8 minutes.</em></h1>
+    <p class="home-sub">The media buyers billing $30k/month aren't working harder. They stopped rebuilding from scratch every time a client signs. Fabro is how they do it.</p>
+    <div class="cta-row">
+      <button class="cta-btn" onclick="claimFreeTrial()">Claim Free Trial →</button>
+      <button class="cta-btn-ghost" onclick="document.getElementById('p0').querySelector('.feat-grid').scrollIntoView({behavior:'smooth'})">See All Tools ↓</button>
+    </div>
+  </div>
+
+  <div class="feat-grid">
+    <div class="feat-card" onclick="startFeature('research')">
+      <span class="feat-icon">🔍</span>
+      <div class="feat-name">Market Research</div>
+      <div class="feat-desc">Most ads fail before they launch. Wrong message, wrong angle, zero insight into what the market actually responds to. Fix that first.</div>
+      <div class="feat-tags"><span class="feat-tag">Competitor Ads</span><span class="feat-tag">Customer Language</span><span class="feat-tag">Buying Triggers</span></div>
+      <div class="feat-time">~2 min</div>
+    </div>
+
+    <div class="feat-card" onclick="startFeature('strategy')">
+      <span class="feat-icon">📊</span>
+      <div class="feat-name">Ad Strategy</div>
+      <div class="feat-desc">Stop guessing your campaign structure. Get a complete, executable Meta ads blueprint — budget benchmarked against your niche, objective locked, angles defined, kill signals set before you spend a dollar.</div>
+      <div class="feat-tags"><span class="feat-tag">Budget Intelligence</span><span class="feat-tag">Campaign Structure</span><span class="feat-tag">30-Day Roadmap</span></div>
+      <div class="feat-time">~3 min</div>
+    </div>
+
+    <div class="feat-card" onclick="startFeature('copy')">
+      <span class="feat-icon">✍️</span>
+      <div class="feat-name">Ad Copy &amp; Scripts</div>
+      <div class="feat-desc">The hook is 80% of the ad. Get scroll-stopping hooks, Hormozi-style copies, image ad texts, and full video scripts — built on real buying triggers, not generic templates.</div>
+      <div class="feat-tags"><span class="feat-tag">5 Angle Hooks</span><span class="feat-tag">Image Ads</span><span class="feat-tag">Video Scripts</span></div>
+      <div class="feat-time">~3 min</div>
+    </div>
+
+    <div class="feat-card" onclick="startFeature('brief')">
+      <span class="feat-icon">🖼️</span>
+      <div class="feat-name">Creative Brief</div>
+      <div class="feat-desc">Vague creative briefs produce vague creatives. Get 15 fully-briefed ad themes — TOF to BOF — with exact visual direction and image text your designer can execute without a single follow-up call.</div>
+      <div class="feat-tags"><span class="feat-tag">15 Themes</span><span class="feat-tag">Designer-Ready</span><span class="feat-tag">TOF–BOF</span></div>
+      <div class="feat-time">~2 min</div>
+    </div>
+
+    <div class="feat-card" onclick="startFeature('funnel')">
+      <span class="feat-icon">🎯</span>
+      <div class="feat-name">Funnel Readiness</div>
+      <div class="feat-desc">Running BOF ads to an audience of 12 people is how you burn budget and blame the algorithm. Find out exactly which stages your client can run today — and what's needed to unlock the rest.</div>
+      <div class="feat-tags"><span class="feat-tag">TOF</span><span class="feat-tag">MOF</span><span class="feat-tag">BOF</span></div>
+      <div class="feat-time">~1 min</div>
+    </div>
+
+    <div class="feat-card full-pack" onclick="startFeature('full')">
+      <span class="feat-icon">⚡</span>
+      <div>
+        <div class="feat-name">Full Funnel Package</div>
+        <div class="feat-desc">One intake. Everything out. Research, strategy, copy, video scripts, and creative brief — generated in parallel. What used to take a full workday now takes 8 minutes. This is the unfair advantage.</div>
+        <div class="feat-tags"><span class="feat-tag">All 5 Outputs</span><span class="feat-tag">One Intake</span><span class="feat-tag">Free First Session</span></div>
+        <div class="feat-time">~8 min</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BEFORE / AFTER ── -->
+  <div class="bafa-section">
+    <div class="bafa-inner">
+      <div class="bafa-eyebrow">The Real Difference</div>
+      <h2 class="bafa-title">Before Fabro.<br/>After <em>Fabro.</em></h2>
+      <p class="bafa-sub">This isn't about working harder. It's about what happens when the infrastructure does the heavy lifting.</p>
+      <div class="bafa-grid">
+        <div class="bafa-col before">
+          <div class="bafa-col-head">
+            <div class="bafa-col-icon x">✕</div>
+            <span class="bafa-col-label x">Without Fabro</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot x">✕</div>
+            <span class="bafa-item-text x">4–6 hours building a client strategy from scratch every time a new client signs</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot x">✕</div>
+            <span class="bafa-item-text x">Generic ChatGPT copy that sounds like a press release nobody asked for</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot x">✕</div>
+            <span class="bafa-item-text x">Guessing campaign structure because you don't have benchmark data for every niche</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot x">✕</div>
+            <span class="bafa-item-text x">Creative briefs so vague your designer sends 4 follow-up messages before starting</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot x">✕</div>
+            <span class="bafa-item-text x">Spending hours on research that should take minutes — Reddit, YouTube, competitor ads</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot x">✕</div>
+            <span class="bafa-item-text x">Launching campaigns with no kill thresholds. Watching budget burn. Deciding too late.</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot x">✕</div>
+            <span class="bafa-item-text x">Capped at 3–4 clients because the build time makes scaling physically impossible</span>
+          </div>
+        </div>
+        <div class="bafa-col after">
+          <div class="bafa-col-head">
+            <div class="bafa-col-icon ok">✓</div>
+            <span class="bafa-col-label ok">With Fabro</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot ok">✓</div>
+            <span class="bafa-item-text ok">Complete client intelligence report in under 5 minutes. Onboarding call done differently now.</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot ok">✓</div>
+            <span class="bafa-item-text ok">Hormozi-style copy built on real buying triggers and actual customer language — not assumptions</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot ok">✓</div>
+            <span class="bafa-item-text ok">Industry benchmarks pulled per niche. Budget validated before a single dollar gets allocated.</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot ok">✓</div>
+            <span class="bafa-item-text ok">15-theme creative brief with exact visual direction. Designer starts immediately. Zero confusion.</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot ok">✓</div>
+            <span class="bafa-item-text ok">Competitor ads decoded. Customer language extracted. Market gaps identified. In one output.</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot ok">✓</div>
+            <span class="bafa-item-text ok">Kill and scale thresholds defined before launch. No guessing. No emotional decisions.</span>
+          </div>
+          <div class="bafa-item">
+            <div class="bafa-dot ok">✓</div>
+            <span class="bafa-item-text ok">Handle more clients without more hours. The system scales. Your time doesn't have to.</span>
+          </div>
+        </div>
+      </div>
+      <div class="bafa-cta">
+        <button class="cta-btn" onclick="claimFreeTrial()">Claim Free Trial — It's Free →</button>
+        <p style="font-size:12px;font-weight:300;color:rgba(250,249,245,.25);margin-top:12px;">No credit card. No commitment. Full access on your first session.</p>
+      </div>
+    </div>
+  </div>
+  <div class="outcome-section">
+    <div class="outcome-inner">
+      <div class="outcome-eyebrow">What This Actually Does To Your Business</div>
+      <h2 class="outcome-title">Imagine opening your laptop<br/>on Monday with <em>every client ready.</em></h2>
+      <p class="outcome-sub">Not scrambling. Not rebuilding from scratch. Strategy done. Copy done. Briefs done. You showing up as the expert — not the one still figuring it out.</p>
+
+      <div class="outcome-grid">
+        <div class="outcome-card">
+          <span class="outcome-num">8×</span>
+          <div class="outcome-label">Faster Campaign Build</div>
+          <div class="outcome-desc">What used to take a full workday takes under an hour. Research, strategy, copy, and briefs — done.</div>
+        </div>
+        <div class="outcome-card">
+          <span class="outcome-num">0</span>
+          <div class="outcome-label">Generic Templates Used</div>
+          <div class="outcome-desc">Every output is specific to the client's offer, audience, and market. Not copy-paste. Not reworded.</div>
+        </div>
+        <div class="outcome-card">
+          <span class="outcome-num">5</span>
+          <div class="outcome-label">Deliverables Per Client</div>
+          <div class="outcome-desc">Research report. Strategy document. Ad copy. Video scripts. Creative brief. All from one intake.</div>
+        </div>
+      </div>
+
+      <div class="outcome-quote">
+        <div class="outcome-quote-text">"Most media buyers don't have a talent problem. They have a <strong>leverage problem.</strong> You can only do so much manually before the hours run out. The ones winning at scale have systems doing the work."</div>
+        <div class="outcome-quote-attr">— The Principle Behind Fabro</div>
+      </div>
+      <div class="outcome-cta">
+        <button class="cta-btn" onclick="claimFreeTrial()" style="margin-top:32px;">Claim Your Free Trial →</button>
+        <p style="font-size:12px;font-weight:300;color:rgba(250,249,245,.25);margin-top:12px;">First session completely free. All 6 tools. No card required.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SOCIAL FOOTER ── -->
+  <div class="social-footer">
+    <div class="social-footer-logo">
+      <svg viewBox="-8 -8 116 116" fill="none" width="22" height="22">
+        <defs><linearGradient id="lgsf" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#C45A2E"/><stop offset="100%" stop-color="#E8845A"/></linearGradient></defs>
+        <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lgsf)" transform="rotate(0,50,50)"/>
+        <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lgsf)" opacity=".75" transform="rotate(45,50,50)"/>
+        <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lgsf)" opacity=".55" transform="rotate(90,50,50)"/>
+        <rect x="43" y="6" width="14" height="44" rx="7" fill="url(#lgsf)" opacity=".38" transform="rotate(135,50,50)"/>
+        <circle cx="50" cy="50" r="9" fill="rgba(250,249,245,.12)"/>
+        <circle cx="50" cy="50" r="4" fill="url(#lgsf)"/>
+      </svg>
+      <span class="sfl-text">Fabro</span>
+    </div>
+    <span class="social-footer-tagline">Craft Your Fortune</span>
+    <div class="social-links">
+      <!-- Facebook -->
+      <a class="social-link" href="https://www.facebook.com/share/1CUHrEVnpo/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="24" height="24" rx="5" fill="#1877F2" opacity=".15"/>
+          <path d="M16.5 3H14C12.343 3 11 4.343 11 6V8H9V11H11V21H14V11H16.5L17 8H14V6C14 5.448 14.448 5 15 5H17V3H16.5Z" fill="#1877F2"/>
+        </svg>
+        <span class="social-link-name">Facebook</span>
+      </a>
+      <!-- Instagram -->
+      <a class="social-link" href="https://www.instagram.com/fabro_ai?igsh=bW90cW4yaGVxczds" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="24" height="24" rx="5" fill="url(#igGrad)" opacity=".15"/>
+          <defs>
+            <linearGradient id="igGrad" x1="0" y1="24" x2="24" y2="0">
+              <stop offset="0%" stop-color="#F58529"/>
+              <stop offset="50%" stop-color="#DD2A7B"/>
+              <stop offset="100%" stop-color="#8134AF"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#igGrad)" stroke-width="2" fill="none"/>
+          <circle cx="12" cy="12" r="4" stroke="url(#igGrad)" stroke-width="2" fill="none"/>
+          <circle cx="17.5" cy="6.5" r="1.5" fill="url(#igGrad)"/>
+        </svg>
+        <span class="social-link-name">Instagram</span>
+      </a>
+    </div>
+    <span class="social-footer-copy">© 2025 Fabro. All rights reserved.</span>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     P1: SMART INTAKE
+══════════════════════════════════════ -->
+<div class="page" id="p1">
+  <div class="inner">
+    <div class="pg-eyebrow" id="intakeEyebrow">Client Setup</div>
+    <h1 class="pg-title" id="intakeTitle">Give Fabro the<br/>intel. It does<br/>the <em>heavy lifting.</em></h1>
+    <p class="pg-desc" id="intakeDesc">Paste the website URL and Fabro pulls what it can automatically. You only fill in what it can't find. Most fields take under 60 seconds.</p>
+
+    <!-- URL EXTRACTOR -->
+    <div class="url-section">
+      <div class="url-section-title">Website URL (optional)</div>
+      <div class="url-row">
+        <div class="url-input-row">
+          <div class="url-wrap">
+            <span class="url-pre">https://</span>
+            <input type="text" id="f_url" placeholder="yourwebsite.com" onkeydown="if(event.key==='Enter')extractUrl()"/>
+          </div>
+        </div>
+        <div class="url-btn-row">
+          <button class="btn-extract" id="btnExtract" onclick="extractUrl()">Extract from website →</button>
+          <button class="btn-skip-url" onclick="skipUrl()">No website</button>
+        </div>
+      </div>
+
+      <div class="extract-result" id="extractResult">
+        <div class="extract-summary" id="extractSummary"></div>
+        <div class="extract-note" id="extractNote"></div>
+      </div>
+    </div>
+
+    <!-- EXTRACTED FIELDS REVIEW -->
+    <div class="extracted-review" id="extractedReview" style="display:none;">
+      <div class="extracted-review-hd" onclick="toggleExtractedReview(this)">
+        <span class="er-title">✓ Extracted from website — click to review &amp; edit</span>
+        <span class="er-chev">▼</span>
+      </div>
+      <div class="extracted-body">
+        <div class="extracted-fields" id="extractedFields"></div>
+      </div>
+    </div>
+
+    <!-- DYNAMIC FORM (only shows fields needed for selected feature that weren't extracted) -->
+    <div id="dynamicForm"></div>
+
+    <!-- CAMPAIGN HISTORY (for strategy + full) -->
+    <div id="historySection" style="display:none;">
+      <div class="form-section">
+        <div class="fs-title">Have They Run Meta Ads Before?</div>
+        <div class="rc-grid">
+          <div class="rc" id="rc_yes" onclick="pickPrev('yes')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">✅ Yes — I'll share what happened</div><div class="rc-sub">Data sharpens the strategy significantly</div></div></div>
+          <div class="rc" id="rc_no" onclick="pickPrev('no')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">🆕 No — first Meta campaign</div><div class="rc-sub">Fabro will build from industry benchmarks</div></div></div>
+        </div>
+      </div>
+      <div id="prevFields" style="display:none;">
+        <div class="form-section">
+          <div class="fs-title">Previous Campaign Data</div>
+          <div class="info-box">💡 In Ads Manager: select all rows at each level, copy-paste here. The more you share, the better the strategy.</div>
+          <div class="fg">
+            <div class="fld"><label class="lbl">Objective Used</label>
+              <select class="fi" id="p_obj"><option value="">Select…</option><option>Sales/Conversions</option><option>Leads</option><option>Traffic</option><option>Engagement</option><option>Video Views</option><option>Awareness</option></select>
+            </div>
+            <div class="fld"><label class="lbl">Budget Used</label><input class="fi" type="text" id="p_budget" placeholder="e.g. $50/day or $1,500/month"/></div>
+            <div class="fld"><label class="lbl">Campaign-Level Stats (paste from Ads Manager)</label><textarea class="fi" id="p_camp" placeholder="Results, Cost per Result, CTR, CPM, Amount Spent…"></textarea></div>
+            <div class="fld"><label class="lbl">Ad Set-Level Stats (note audience type for each)</label><textarea class="fi" id="p_adset" placeholder="Which ad sets used Broad, Advantage+, or interests…"></textarea></div>
+            <div class="fld"><label class="lbl">Ad-Level Stats (note format for each)</label><textarea class="fi" id="p_ads" placeholder="Which ads were video, image, carousel, UGC…"></textarea></div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="fs-title">What Worked &amp; What Didn't</div>
+          <div class="fg c2">
+            <div class="fld"><label class="lbl">Best Performing Audiences</label><textarea class="fi" id="p_bestaud"></textarea></div>
+            <div class="fld"><label class="lbl">Best Creative Formats</label><textarea class="fi" id="p_bestfmt"></textarea></div>
+            <div class="fld s2"><label class="lbl">Best Copy / Scripts (optional)</label><textarea class="fi" id="p_bestcopy"></textarea></div>
+            <div class="fld s2"><label class="lbl">What Didn't Work</label><textarea class="fi" id="p_failed"></textarea></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUDGET + OBJECTIVE (for strategy + full) -->
+    <div id="budgetSection" style="display:none;">
+      <div class="form-section">
+        <div class="fs-title">Budget &amp; Objective</div>
+        <div class="fg c2">
+          <div class="fld"><label class="lbl">Daily Budget (USD) <span>*</span></label><input class="fi" type="text" id="b_daily" placeholder="e.g. 50" oninput="calcMonthly()"/></div>
+          <div class="fld"><label class="lbl">Monthly (auto)</label><input class="fi" type="text" id="b_monthly" readonly style="opacity:.6"/></div>
+        </div>
+        <div style="margin-top:14px;">
+          <label class="lbl" style="margin-bottom:10px;display:block;">Primary Objective</label>
+          <div class="rc-grid c2">
+            <div class="rc" id="o_sales" onclick="pickObj('sales')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">💰 Sales / Purchases</div></div></div>
+            <div class="rc" id="o_leads" onclick="pickObj('leads')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">📋 Leads / Sign-Ups</div></div></div>
+            <div class="rc" id="o_traffic" onclick="pickObj('traffic')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">🔗 Website Traffic</div></div></div>
+            <div class="rc" id="o_awareness" onclick="pickObj('awareness')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">📣 Brand Awareness</div></div></div>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <label class="lbl" style="margin-bottom:10px;display:block;">Active Funnel Stages</label>
+          <div class="rc-grid">
+            <div class="rc" id="f_tof" onclick="pickFunnel('tof')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">🔝 TOF Only — Cold Audience</div><div class="rc-sub">No prior brand awareness. Build from scratch.</div></div></div>
+            <div class="rc" id="f_mof" onclick="pickFunnel('mof')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">🔝🎯 TOF + MOF</div><div class="rc-sub">Existing engagement or warm audience to work with.</div></div></div>
+            <div class="rc" id="f_full" onclick="pickFunnel('full')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">🔝🎯💰 Full Funnel</div><div class="rc-sub">Pixel active, 300+ monthly visitors, retargeting pool ready.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COPY FUNNEL SELECTION (for copy only) -->
+    <div id="copyFunnelSection" style="display:none;">
+      <div class="form-section">
+        <div class="fs-title">Which Funnel Stage Is This Copy For?</div>
+        <div class="rc-grid">
+          <div class="rc" id="cf_tof" onclick="pickCopyFunnel('tof')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">🔝 TOF — Cold Traffic</div><div class="rc-sub">People who have never heard of this brand</div></div></div>
+          <div class="rc" id="cf_mof" onclick="pickCopyFunnel('mof')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">🎯 MOF — Warm Audience</div><div class="rc-sub">Seen the brand, haven't acted yet</div></div></div>
+          <div class="rc" id="cf_bof" onclick="pickCopyFunnel('bof')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">💰 BOF — Retargeting</div><div class="rc-sub">Visited the site or engaged with the brand</div></div></div>
+          <div class="rc" id="cf_all" onclick="pickCopyFunnel('all')"><div class="rc-dot"></div><div class="rc-info"><div class="rc-label">⚡ All Three Stages</div><div class="rc-sub">Generate copy for every funnel stage</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row right">
+      <button class="btn btn-g" onclick="goHome()">← Home</button>
+      <button class="btn btn-p" id="btnGenerate" onclick="runGenerate()">Generate →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     P2: RESEARCH OUTPUT
+══════════════════════════════════════ -->
+<div class="page" id="p2">
+  <div class="inner">
+    <div class="pg-eyebrow">Market Research</div>
+    <h1 class="pg-title">Your client's market.<br/><em>Fully decoded.</em></h1>
+    <p class="pg-desc" style="margin-bottom:28px;">Competitor ads dissected. Customer language extracted. Buying triggers identified. Every campaign should start here. Almost none do.</p>
+    <div id="out_research"></div>
+    <div class="btn-row">
+      <button class="btn btn-dl" onclick="dlPDF('research')">↓ Download PDF</button>
+      <div class="spacer"></div>
+      <button class="btn btn-g" onclick="go('p1')">← Edit Details</button>
+    </div>
+    <div class="wnext" id="wnext_research"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     P3: STRATEGY OUTPUT
+══════════════════════════════════════ -->
+<div class="page" id="p3">
+  <div class="inner">
+    <div class="pg-eyebrow">Ad Strategy</div>
+    <h1 class="pg-title">The blueprint.<br/>Not a starting point —<br/>a <em>campaign you can run.</em></h1>
+    <p class="pg-desc" style="margin-bottom:28px;">Benchmarked against your niche. Built around your budget. Every section tells you exactly what to do, in what order, with what thresholds to scale or kill.</p>
+    <div id="out_strategy"></div>
+    <div class="btn-row">
+      <button class="btn btn-dl" onclick="dlPDF('strategy')">↓ Download PDF</button>
+      <div class="spacer"></div>
+      <button class="btn btn-g" onclick="go('p1')">← Edit Details</button>
+    </div>
+    <div class="wnext" id="wnext_strategy"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     P4: COPY OUTPUT
+══════════════════════════════════════ -->
+<div class="page" id="p4">
+  <div class="inner">
+    <div class="pg-eyebrow">Ad Copy &amp; Scripts</div>
+    <h1 class="pg-title">Hooks. Copy. Scripts.<br/><em>Ready to run.</em></h1>
+    <p class="pg-desc" style="margin-bottom:28px;">Five angles. Five copy sets. Ten image ad texts. Five video scripts built beat-by-beat. Every word tied to a real buying trigger. None of it sounds like it was written by a robot.</p>
+    <div class="ftabs" id="copyTabs"></div>
+    <div id="copy_panel"></div>
+    <div class="btn-row">
+      <button class="btn btn-dl" onclick="dlPDF('copy')">↓ Download Pack</button>
+      <div class="spacer"></div>
+      <button class="btn btn-g" onclick="go('p1')">← Edit Details</button>
+    </div>
+    <div class="wnext" id="wnext_copy"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     P5: CREATIVE BRIEF OUTPUT
+══════════════════════════════════════ -->
+<div class="page" id="p5">
+  <div class="inner">
+    <div class="pg-eyebrow">Creative Brief</div>
+    <h1 class="pg-title">15 ad concepts.<br/>Zero ambiguity for<br/>your <em>designer.</em></h1>
+    <p class="pg-desc" style="margin-bottom:28px;">Every theme has exact visual direction, on-image text, and a funnel tag. Hand this to a designer or drop it into an AI image tool. No follow-up calls needed.</p>
+    <div id="out_brief"></div>
+    <div class="btn-row">
+      <button class="btn btn-dl" onclick="dlPDF('brief')">↓ Download PDF</button>
+      <div class="spacer"></div>
+      <button class="btn btn-g" onclick="go('p1')">← Edit Details</button>
+    </div>
+    <div class="wnext" id="wnext_brief"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     P6: FUNNEL READINESS
+══════════════════════════════════════ -->
+<div class="page" id="p6">
+  <div class="inner">
+    <div class="pg-eyebrow">Funnel Readiness</div>
+    <h1 class="pg-title">Here's what's ready<br/>to run — and what<br/><em>isn't. Yet.</em></h1>
+    <p class="pg-desc" style="margin-bottom:28px;">Every stage assessed against real readiness criteria. No point running MOF to an audience that doesn't exist. This tells you exactly where to start and what to build toward.</p>
+    <div id="out_funnel"></div>
+    <div class="btn-row">
+      <div class="spacer"></div>
+      <button class="btn btn-g" onclick="go('p1')">← Edit Details</button>
+    </div>
+    <div class="wnext" id="wnext_funnel"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+//  STATE & FEATURE CONFIG
+// ═══════════════════════════════════
+const S={
+  feature:null,prev:null,obj:null,funnel:null,copyFunnel:null,
+  client:{},extracted:{},copyTabs:{},activeTab:null,reports:{}
+};
+
+// Fields each feature REQUIRES (minimum to proceed)
+const FEAT_REQ={
+  research:  ['name','niche'],
+  strategy:  ['name','niche','offer','audience'],
+  copy:      ['name','niche','offer','audience','cta'],
+  brief:     ['name','niche','offer','audience'],
+  funnel:    ['name','niche'],
+  full:      ['name','niche','offer','audience','pains','cta']
+};
+
+// Fields each feature BENEFITS FROM (shown if not extracted)
+const FEAT_HELPFUL={
+  research:  ['pains','geo','competitors'],
+  strategy:  ['pains','usp','cta','geo','competitors'],
+  copy:      ['pains','usp','geo'],
+  brief:     ['pains','usp','cta','geo'],
+  funnel:    ['offer','audience','pains'],
+  full:      ['usp','geo','competitors']
+};
+
+const FIELD_META={
+  name:       {label:'Business Name',       placeholder:'e.g. Peak Performance Studio',                         multi:false},
+  niche:      {label:'Industry / Niche',    placeholder:'e.g. Fitness & Wellness, Lahore — be specific',       multi:false},
+  offer:      {label:'Main Offer + Key Benefit', placeholder:'What are they selling and why does it matter?',  multi:false},
+  audience:   {label:'Target Audience',     placeholder:'Who is the ideal customer? Age, situation, location, what they want most.', multi:true},
+  pains:      {label:'Top 3 Pain Points',   placeholder:'Pain #1:\nPain #2:\nPain #3:\n\nBe specific — real frustrations, not vague desires.',multi:true},
+  usp:        {label:'Unique Selling Point',placeholder:'What genuinely sets this client apart? Specific and defensible only.',multi:true},
+  cta:        {label:'Desired Action (CTA)',placeholder:'e.g. Book a free call / Get a quote / Buy now',       multi:false},
+  geo:        {label:'Geographic Focus',    placeholder:'e.g. Lahore + Karachi / UAE only / Nationwide',      multi:false},
+  competitors:{label:'Competitor Names',    placeholder:'2–4 direct competitors, or leave blank',              multi:false}
+};
+
+// Feature display names & steps
+const FEAT_META={
+  research: {name:'Market Research',      icon:'🔍',  outputPage:'p2', outId:'wnext_research'},
+  strategy: {name:'Ad Strategy',          icon:'📊',  outputPage:'p3', outId:'wnext_strategy'},
+  copy:     {name:'Ad Copy & Scripts',    icon:'✍️',  outputPage:'p4', outId:'wnext_copy'},
+  brief:    {name:'Creative Brief',       icon:'🖼️',  outputPage:'p5', outId:'wnext_brief'},
+  funnel:   {name:'Funnel Readiness',     icon:'🎯',  outputPage:'p6', outId:'wnext_funnel'},
+  full:     {name:'Full Funnel Package',  icon:'🚀',  outputPage:'p2', outId:'wnext_research'}
+};
+
+// SKILL.md system prompt base
+const SYS=`You are AdFunnel Pro — an AI-powered advertising strategy system for digital marketing agencies. You produce agency-grade, client-specific output. Never generic.
+
+HUMAN TONE RULES (apply to ALL output):
+- Short sentences. Mix with medium ones.
+- Always use contractions: you're, they've, that's, it's, here's.
+- Speak to one person — not "audiences" or "customers."
+- Real specific language: "Most contractors ghost you after the deposit" not "service providers may fail to follow through."
+- Reference real scenarios — moments, frustrations, specific situations.
+- Vary sentence rhythm. Short. Then a bit longer. Short again.
+- NEVER write: "In today's competitive landscape" / "your journey" / "the power of X" / "achieve your goals" / "we understand your needs."
+- NEVER use: leverage, utilize, empower, unlock, game-changing, transformative, holistic, cutting-edge, synergy, tailored, seamlessly, robust, scalable, innovative.
+
+EMOJI RULES: Only in Hormozi ad copies and image ad text. Zero emojis in video scripts, creative briefs, strategy, or research. Max 2 per ad copy. Hook or CTA only.
+
+OUTPUT: Pure HTML using provided CSS classes only. No markdown, no backticks, no code blocks, no preamble.
+Tag every creative asset [TOF], [MOF], or [BOF].`;
+
+// ═══════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════
+function go(pageId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  updateBreadcrumb(pageId);
+}
+
+function goHome(){
+  Object.assign(S,{feature:null,prev:null,obj:null,funnel:null,copyFunnel:null,reports:{}});
+  go('p0');
+  updateBreadcrumb('p0');
+}
+
+// ═══════════════════════════════════
+//  LEAD GATE
+// ═══════════════════════════════════
+function initLeadGate(){
+  // Lead form is triggered by card clicks and CTA buttons — not auto-shown
+}
+
+function submitLead(){
+  const name=document.getElementById('lead_name').value.trim();
+  const phone=document.getElementById('lead_phone').value.trim();
+  const email=document.getElementById('lead_email').value.trim();
+  if(!name){document.getElementById('lead_name').focus();toast('Please enter your name','err');return;}
+  if(!email||!email.includes('@')){document.getElementById('lead_email').focus();toast('Please enter a valid email','err');return;}
+  const lead={name,phone,email,ts:new Date().toISOString()};
+  localStorage.setItem('fabro_lead',JSON.stringify(lead));
+  console.log('New Fabro lead:',lead);
+  document.getElementById('leadModal').classList.remove('show');
+  const firstName=name.split(' ')[0];
+  toast(`Welcome, ${firstName}! Your free trial is active — let's build.`,'ok',5000);
+  // If they clicked a specific feature card, take them there now
+  if(S.pendingFeature){
+    const feat=S.pendingFeature;
+    S.pendingFeature=null;
+    setTimeout(()=>startFeature(feat),500);
+  }
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('leadModal').classList.contains('show'))submitLead();
+});
+
+// ═══════════════════════════════════
+//  SESSION GATE — first session free, subscription after
+// ═══════════════════════════════════
+function isSubscribed(){
+  return localStorage.getItem('fabro_subscribed')==='true';
+}
+
+function hasUsedFreeTrial(){
+  return parseInt(localStorage.getItem('fabro_sessions_used')||'0') > 0;
+}
+
+function markSessionUsed(){
+  const count=parseInt(localStorage.getItem('fabro_sessions_used')||'0');
+  localStorage.setItem('fabro_sessions_used', String(count+1));
+}
+
+// Called at the START of every feature — checks if they need to subscribe
+function checkAccess(){
+  if(isSubscribed()) return true;   // subscriber — always pass
+  if(!hasUsedFreeTrial()) return true; // first session — free pass
+  // Has used free trial and not subscribed → show subscription wall
+  openPayModal();
+  return false;
+}
+
+// Called when an output is successfully delivered — marks session used
+function onSessionComplete(){
+  if(!isSubscribed()&&!hasUsedFreeTrial()){
+    markSessionUsed();
+    // Show a gentle nudge after a short delay so they see the output first
+    setTimeout(()=>{
+      toast('Free session complete. Subscribe at $19/month to keep going →','info',6000);
+    }, 3000);
+  }
+}
+
+function openPayModal(){
+  document.getElementById('payModal').classList.add('show');
+}
+
+function closePayModal(){
+  document.getElementById('payModal').classList.remove('show');
+}
+
+function goToStripe(){
+  localStorage.setItem('fabro_redirected_stripe','true');
+  window.open(CONFIG.STRIPE_LINK,'_blank');
+  setTimeout(()=>{
+    closePayModal();
+    toast('Complete subscription in the new tab — then come back and keep building ✓','info',6000);
+  },800);
+}
+
+function checkStripeReturn(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('subscribed')==='true'){
+    localStorage.setItem('fabro_subscribed','true');
+    toast('Subscription active — welcome to Fabro Pro. Unlimited access, all tools. ⚡','ok',6000);
+    window.history.replaceState({},'',window.location.pathname);
+  }
+}
+
+document.getElementById('leadModal').addEventListener('click',function(e){
+  if(e.target===this){/* intentionally block closing without submitting */}
+});
+document.getElementById('payModal').addEventListener('click',function(e){
+  if(e.target===this)closePayModal();
+});
+
+function updateBreadcrumb(pageId){
+  const bc=document.getElementById('navBread');
+  const cb=document.getElementById('clientBadge');
+  if(pageId==='p0'){bc.innerHTML='';cb.classList.remove('show');return;}
+  const fname=S.feature?FEAT_META[S.feature]?.name:'';
+  const pageNames={p1:'Client Setup',p2:'Research',p3:'Strategy',p4:'Copy',p5:'Brief',p6:'Funnel'};
+  const pname=pageNames[pageId]||'';
+  bc.innerHTML=`<span class="nbc-home" onclick="goHome()">Home</span>
+    ${fname?`<span class="nbc-sep">›</span><span class="nbc-feature">${FEAT_META[S.feature]?.icon} ${fname}</span>`:''}
+    ${pname&&pname!=='Client Setup'?`<span class="nbc-sep">›</span><span class="nbc-step">${pname}</span>`:''}`;
+  if(S.client.name){cb.textContent=S.client.name;cb.classList.add('show');}
+}
+
+// ═══════════════════════════════════
+//  FEATURE SELECTION
+// ═══════════════════════════════════
+function startFeature(feat){
+  // Step 1: Lead gate — must submit form before anything
+  if(!hasLead()){
+    S.pendingFeature=feat;
+    showLeadModal();
+    return;
+  }
+  // Step 2: Session gate — first session free, subscription after
+  if(!checkAccess()) return;
+  S.feature=feat;
+  buildIntakePage(feat);
+  go('p1');
+}
+
+function hasLead(){
+  return !!localStorage.getItem('fabro_lead');
+}
+
+function showLeadModal(){
+  document.getElementById('leadModal').classList.add('show');
+}
+
+function claimFreeTrial(){
+  // Claim Free Trial CTA always shows the lead form
+  // It's the primary conversion point — always capture
+  S.pendingFeature=null;
+  showLeadModal();
+}
+
+function buildIntakePage(feat){
+  const meta=FEAT_META[feat];
+  const req=FEAT_REQ[feat]||[];
+  const helpful=FEAT_HELPFUL[feat]||[];
+
+  // Update page header
+  const headers={
+    research: [
+      'Market Research',
+      'Know their market better than they do.',
+      'Paste the URL or drop in the basics. Fabro digs into what competitors are running, what customers are actually saying, and where the real gaps are. Takes 2 minutes of your time.'
+    ],
+    strategy: [
+      'Ad Strategy',
+      'Stop winging it. Build the blueprint first.',
+      'Share the client details and Fabro builds a complete Meta ads strategy — budget benchmarked against the industry, campaign structure, audience approach, and a 30-day execution roadmap. No guessing.'
+    ],
+    copy: [
+      'Ad Copy & Scripts',
+      'Hooks that stop the scroll. Copy that closes.',
+      'Give Fabro the offer and audience. It handles the angles, hooks, Hormozi-style copies, image ad texts, and full video scripts. Every word tied to a real buying trigger — not a generic template.'
+    ],
+    brief: [
+      'Creative Brief',
+      'Briefs your designer can actually execute.',
+      'Share the offer and audience. Fabro produces 15 fully-briefed ad themes from TOF to BOF — with exact visual direction and on-image text. No follow-up calls. No "what did you mean by this?" emails.'
+    ],
+    funnel: [
+      'Funnel Readiness',
+      'Find out which stages are actually ready to run.',
+      'Most media buyers skip this check and wonder why BOF campaigns are delivering to 40 people. Fabro tells you exactly which funnel stages are ready, which aren\'t, and what\'s needed to unlock each one.'
+    ],
+    full: [
+      'Full Funnel Package',
+      'One intake. Five outputs. Eight minutes.',
+      'Fill this in once. Fabro runs everything in parallel — research, strategy, copy, video scripts, and a 15-theme creative brief. What used to consume a full workday is done before your next client call.'
+    ]
+  };
+  const [eyebrow,title,desc]=headers[feat]||['Client Setup','Give Fabro the intel.',''];
+  document.getElementById('intakeEyebrow').textContent=eyebrow;
+  document.getElementById('intakeTitle').innerHTML=title;
+  document.getElementById('intakeDesc').textContent=desc;
+  document.getElementById('btnGenerate').textContent=`Generate ${meta.name} →`;
+
+  // Show/hide sections
+  const needsHistory=['strategy','full'].includes(feat);
+  const needsBudget=['strategy','full'].includes(feat);
+  const needsCopyFunnel=feat==='copy';
+  document.getElementById('historySection').style.display=needsHistory?'block':'none';
+  document.getElementById('budgetSection').style.display=needsBudget?'block':'none';
+  document.getElementById('copyFunnelSection').style.display=needsCopyFunnel?'block':'none';
+
+  // Build dynamic form — all fields (required + helpful), extraction state respected
+  buildDynamicForm(req,helpful);
+
+  // Clear previous extraction
+  document.getElementById('extractResult').classList.remove('show');
+  document.getElementById('extractedReview').style.display='none';
+  document.getElementById('f_url').value='';
+  S.extracted={};
+}
+
+function buildDynamicForm(reqFields,helpfulFields){
+  const allFields=[...new Set([...reqFields,...helpfulFields])];
+  const container=document.getElementById('dynamicForm');
+  if(!allFields.length){container.innerHTML='';return;}
+
+  // Split into 2-column groups nicely
+  const html=`
+    <div class="form-section" id="mainFormSection">
+      <div class="fs-title" id="mainFormTitle">Client Details</div>
+      <div class="fg c2" id="mainFormGrid">
+        ${allFields.map(f=>buildFieldHtml(f,reqFields.includes(f))).join('')}
+      </div>
+    </div>`;
+  container.innerHTML=html;
+}
+
+function buildFieldHtml(fieldKey,isRequired){
+  const meta=FIELD_META[fieldKey];
+  if(!meta)return'';
+  const span=(['audience','pains','usp'].includes(fieldKey))?'s2':'';
+  const id='f_'+fieldKey;
+  const req=isRequired?'<span>*</span>':'';
+  const input=meta.multi
+    ?`<textarea class="fi" id="${id}" placeholder="${meta.placeholder}"></textarea>`
+    :`<input class="fi" type="text" id="${id}" placeholder="${meta.placeholder}"/>`;
+  return`<div class="fld ${span}" id="fld_${fieldKey}">
+    <label class="lbl">${meta.label} ${req}</label>
+    ${input}
+  </div>`;
+}
+
+// ═══════════════════════════════════
+//  URL EXTRACTION
+// ═══════════════════════════════════
+async function extractUrl(){
+  const url=document.getElementById('f_url').value.trim();
+  if(!url){toast('Enter a URL first','info');return;}
+  const btn=document.getElementById('btnExtract');
+  btn.textContent='Extracting…';btn.disabled=true;
+
+  try{
+    const prompt=`Analyze this website URL: https://${url.replace(/^https?:\/\//,'')}
+
+Based on the URL, domain name, and any knowledge from your training data:
+1. If you recognize this website: extract real, accurate information
+2. If unknown: make intelligent inferences from the domain name, TLD (country indicator), and any keywords in the URL
+3. TLD hints: .pk=Pakistan, .ae=UAE, .co.uk=UK, .com.au=Australia, .sa=Saudi Arabia etc.
+
+Return ONLY this exact JSON, no other text:
+{
+  "businessName": "string or null",
+  "niche": "string or null",
+  "offer": "string or null",
+  "audience": "string or null",
+  "pains": "string or null",
+  "usp": "string or null",
+  "cta": "string or null",
+  "geo": "string or null",
+  "competitors": null,
+  "extracted": ["array of field keys you could determine with confidence"],
+  "inferred": ["array of field keys you inferred/guessed from URL clues — less certain"],
+  "needs_input": ["array of field keys the user must provide — couldn't determine"],
+  "source_note": "One honest sentence about what you actually know vs what you inferred from the URL alone"
+}
+
+Field keys are: businessName, niche, offer, audience, pains, usp, cta, geo, competitors`;
+
+    const res=await callAI(prompt,'Return only valid JSON. No other text, no markdown, no backticks.');
+    const clean=res.replace(/```json?/g,'').replace(/```/g,'').trim();
+    const data=JSON.parse(clean);
+    S.extracted=data;
+
+    // Apply extracted values to form fields
+    const keyMap={businessName:'name',niche:'niche',offer:'offer',audience:'audience',pains:'pains',usp:'usp',cta:'cta',geo:'geo',competitors:'competitors'};
+    Object.entries(keyMap).forEach(([apiKey,formKey])=>{
+      const val=data[apiKey];
+      const el=document.getElementById('f_'+formKey);
+      if(el&&val){
+        el.value=val;
+        const fld=document.getElementById('fld_'+formKey);
+        if(fld){
+          const isExtracted=(data.extracted||[]).includes(apiKey);
+          const isInferred=(data.inferred||[]).includes(apiKey);
+          fld.className=fld.className.replace(/\s*(extracted|inferred)/g,'');
+          if(isExtracted)fld.classList.add('extracted');
+          else if(isInferred)fld.classList.add('inferred');
+
+          // Add badge
+          let badge=fld.querySelector('.field-badge');
+          if(!badge){badge=document.createElement('div');fld.insertBefore(badge,fld.querySelector('label').nextSibling);}
+          badge.className='field-badge '+(isExtracted?'fb-extracted':'fb-inferred');
+          badge.textContent=isExtracted?'✓ From website':'~ Estimated';
+        }
+      }
+    });
+
+    // Show summary pills
+    const extracted=data.extracted||[];
+    const inferred=data.inferred||[];
+    const needsInput=data.needs_input||[];
+    const summary=document.getElementById('extractSummary');
+    summary.innerHTML='';
+    if(extracted.length)summary.innerHTML+=`<div class="extract-pill ep-found">✓ ${extracted.length} field${extracted.length!==1?'s':''} extracted</div>`;
+    if(inferred.length)summary.innerHTML+=`<div class="extract-pill ep-partial">~ ${inferred.length} estimated</div>`;
+    if(needsInput.length)summary.innerHTML+=`<div class="extract-pill ep-missing">${needsInput.length} need your input</div>`;
+    document.getElementById('extractNote').textContent=data.source_note||'';
+    document.getElementById('extractResult').classList.add('show');
+
+    // Show extracted review panel
+    if(extracted.length+inferred.length>0){
+      buildExtractedReview(data,keyMap);
+      document.getElementById('extractedReview').style.display='block';
+    }
+
+    // Update form title to reflect what still needs input
+    const mainTitle=document.getElementById('mainFormTitle');
+    if(mainTitle){
+      const missingReq=(FEAT_REQ[S.feature]||[]).filter(k=>{const apiK=Object.entries(keyMap).find(([a,f])=>f===k)?.[0];return !val_for(k);});
+      mainTitle.textContent=missingReq.length?'Please fill in the missing details':'Review & complete details';
+    }
+
+    toast(`Extracted ${extracted.length} fields from website ✓`,'ok');
+  }catch(e){
+    console.error(e);
+    toast('Could not extract — fill in manually below','info');
+    document.getElementById('extractResult').classList.add('show');
+    document.getElementById('extractSummary').innerHTML='<div class="extract-pill ep-missing">Could not extract — please fill in manually</div>';
+    document.getElementById('extractNote').textContent='This website wasn\'t in our training data. Fill in the fields below.';
+  }
+  btn.textContent='Re-extract';btn.disabled=false;
+}
+
+function val_for(formKey){const el=document.getElementById('f_'+formKey);return el&&el.value.trim();}
+
+function buildExtractedReview(data,keyMap){
+  const container=document.getElementById('extractedFields');
+  const allExtracted=[...(data.extracted||[]),...(data.inferred||[])];
+  container.innerHTML=allExtracted.map(apiKey=>{
+    const formKey=keyMap[apiKey];
+    if(!formKey||!data[apiKey])return'';
+    const isInferred=(data.inferred||[]).includes(apiKey);
+    return`<div class="ef-item">
+      <span class="ef-label">${FIELD_META[formKey]?.label||apiKey}</span>
+      <span class="ef-value">${data[apiKey]}</span>
+      <span class="ef-edit" onclick="editExtracted('${formKey}')">${isInferred?'⚠ estimated — click to edit':'✓ edit if needed'}</span>
+    </div>`;
+  }).join('');
+}
+
+function editExtracted(formKey){
+  const el=document.getElementById('f_'+formKey);
+  if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.focus();}
+}
+
+function skipUrl(){
+  document.getElementById('f_url').value='';
+  S.extracted={};
+  const mainTitle=document.getElementById('mainFormTitle');
+  if(mainTitle)mainTitle.textContent='Client Details';
+  document.getElementById('extractResult').classList.remove('show');
+  document.getElementById('extractedReview').style.display='none';
+  toast('Fill in the details below','info');
+}
+
+function toggleExtractedReview(hd){
+  hd.classList.toggle('open');
+  hd.nextElementSibling.classList.toggle('open');
+}
+
+// ═══════════════════════════════════
+//  FORM HELPERS
+// ═══════════════════════════════════
+function pickPrev(v){S.prev=v;['yes','no'].forEach(x=>document.getElementById('rc_'+x)?.classList.remove('on'));document.getElementById('rc_'+v)?.classList.add('on');document.getElementById('prevFields').style.display=v==='yes'?'block':'none';}
+function pickObj(v){S.obj=v;['sales','leads','traffic','awareness'].forEach(o=>document.getElementById('o_'+o)?.classList.remove('on'));document.getElementById('o_'+v)?.classList.add('on');}
+function pickFunnel(v){S.funnel=v;['tof','mof','full'].forEach(f=>document.getElementById('f_'+f)?.classList.remove('on'));document.getElementById('f_'+v)?.classList.add('on');}
+function pickCopyFunnel(v){S.copyFunnel=v;['tof','mof','bof','all'].forEach(f=>document.getElementById('cf_'+f)?.classList.remove('on'));document.getElementById('cf_'+v)?.classList.add('on');}
+function calcMonthly(){const v=parseFloat(document.getElementById('b_daily').value.replace(/[^0-9.]/g,''));document.getElementById('b_monthly').value=isNaN(v)?'':('$'+(v*30).toFixed(0)+'/month');}
+function g(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+
+function collectClient(){
+  S.client={
+    url:g('f_url')||'none',name:g('f_name'),niche:g('f_niche'),
+    offer:g('f_offer'),audience:g('f_audience'),pains:g('f_pains'),
+    usp:g('f_usp'),cta:g('f_cta'),geo:g('f_geo'),competitors:g('f_comp')
+  };
+  if(S.client.name){document.getElementById('clientBadge').textContent=S.client.name;document.getElementById('clientBadge').classList.add('show');}
+}
+
+function validateIntake(){
+  const req=FEAT_REQ[S.feature]||[];
+  for(const f of req){
+    if(!g('f_'+f)){
+      const meta=FIELD_META[f];
+      toast(`Please fill in: ${meta?.label||f}`,'err');
+      document.getElementById('f_'+f)?.focus();
+      return false;
+    }
+  }
+  if(['strategy','full'].includes(S.feature)&&!S.obj){toast('Please select a campaign objective','err');return false;}
+  if(['strategy','full'].includes(S.feature)&&!S.funnel){toast('Please select funnel stages','err');return false;}
+  if(['strategy','full'].includes(S.feature)&&!g('b_daily')){toast('Please enter a daily budget','err');return false;}
+  if(S.feature==='copy'&&!S.copyFunnel){toast('Please select which funnel stage this copy is for','err');return false;}
+  return true;
+}
+
+// ═══════════════════════════════════
+//  MAIN DISPATCHER
+// ═══════════════════════════════════
+async function runGenerate(){
+  if(!validateIntake())return;
+  collectClient();
+  const feat=S.feature;
+  if(feat==='research')await runResearch();
+  else if(feat==='strategy')await runStrategy();
+  else if(feat==='copy')await runCopy();
+  else if(feat==='brief')await runBrief();
+  else if(feat==='funnel')await runFunnelCheck();
+  else if(feat==='full')await runFull();
+}
+
+// ═══════════════════════════════════
+//  LOADING
+// ═══════════════════════════════════
+function showLoad(title,sub,steps){
+  document.getElementById('loTitle').textContent=title;
+  document.getElementById('loSub').textContent=sub;
+  const c=document.getElementById('loSteps');
+  c.innerHTML=steps.map((s,i)=>`<div class="lo-step" id="ls${i}"><div class="lo-dot"></div><span class="lo-txt">${s}</span></div>`).join('');
+  document.getElementById('loadOverlay').classList.add('on');
+  animSteps(steps.length);
+}
+function hideLoad(){document.getElementById('loadOverlay').classList.remove('on');}
+async function animSteps(n){for(let i=0;i<n;i++){await sleep(850+Math.random()*650);if(i>0){const p=document.getElementById('ls'+(i-1));if(p)p.className='lo-step ok';}const c=document.getElementById('ls'+i);if(c)c.className='lo-step cur';}}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ═══════════════════════════════════
+//  API CALL
+// ═══════════════════════════════════
+//  CONFIG — update after deployment
+// ═══════════════════════════════════
+const CONFIG={
+  // Paste your Cloudflare Worker URL here after setup:
+  WORKER_URL: 'https://YOUR-WORKER.YOUR-SUBDOMAIN.workers.dev',
+  // Paste your Stripe subscription link here (NOT a one-time link):
+  STRIPE_LINK: 'https://buy.stripe.com/YOUR_SUBSCRIPTION_LINK',
+  PRICE: '$19/month'
+};
+
+async function callAI(userPrompt,sys){
+  const res=await fetch(CONFIG.WORKER_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:8000,
+      system:sys||SYS,
+      messages:[{role:'user',content:userPrompt}]
+    })
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`API error ${res.status}`);}
+  const d=await res.json();
+  return(d.content?.[0]?.text||'').replace(/```html?/g,'').replace(/```/g,'').trim();
+}
+
+function clientCtx(){
+  return`Business: ${S.client.name}
+Niche: ${S.client.niche}
+Offer: ${S.client.offer||'not specified'}
+Audience: ${S.client.audience||'not specified'}
+Pain Points: ${S.client.pains||'not specified'}
+USP: ${S.client.usp||'not specified'}
+CTA: ${S.client.cta||'not specified'}
+Geography: ${S.client.geo||'not specified'}
+Competitors: ${S.client.competitors||'none given'}
+Website: ${S.client.url||'none'}`;
+}
+
+// ═══════════════════════════════════
+//  FEATURE: RESEARCH
+// ═══════════════════════════════════
+async function runResearch(){
+  showLoad('Running market intelligence…','Analysing competitor ads and real customer conversations.',[
+    'Scanning competitor ads — Meta Ad Library (90+ day performers)',
+    'Decoding competitor angles and campaign structure',
+    'Identifying gaps and entry opportunities',
+    'Researching audience pain points across Reddit, Facebook, YouTube',
+    'Extracting real customer language from reviews and discussions',
+    'Building social listening snapshot',
+    'Assembling your Intelligence Report'
+  ]);
+  const prompt=researchPrompt();
+  try{
+    const html=await callAI(prompt);
+    await sleep(1000);hideLoad();
+    S.reports.research=html;
+    document.getElementById('out_research').innerHTML=html;
+    buildWhatNext('p2','wnext_research',['strategy','copy','brief']);
+    go('p2');
+    onSessionComplete();
+    toast('Research report ready ✓');
+  }catch(e){hideLoad();toast('Error: '+e.message,'err');}
+}
+
+function researchPrompt(){
+  return`Generate a complete Competitor Intelligence + Market Research Report.
+
+${clientCtx()}
+
+Output clean HTML using ONLY these CSS classes. No markdown, no backticks.
+
+STRUCTURE — use this accordion for each section:
+<div class="acc">
+  <div class="acc-hd [add 'open' for first section only]" onclick="toggleAcc(this)">
+    <div class="acc-hd-l"><div class="acc-ico">[EMOJI]</div><div class="acc-title">[TITLE]</div></div>
+    <span class="acc-chev">▼</span>
+  </div>
+  <div class="acc-body [add 'open' for first section only]">
+    <div class="acc-cnt"><div class="rt">[CONTENT]</div></div>
+  </div>
+</div>
+
+Build these 8 sections (first open, rest collapsed):
+
+1. 🕵️ Competitor Ad Intelligence (OPEN)
+Market overview (3-4 sentences on competitive landscape). Then for each major competitor or niche category player:
+<h4>[Brand/Category]</h4>
+<p><strong>Campaign read:</strong> [What objective they likely use, platform, creative approach, testing vs scaling]</p>
+<p><strong>Dominant angle:</strong> [one of: Problem-aware narrative / Social proof / Identity aspiration / Risk reversal / Direct offer / Root cause / Urgency / Comparison]</p>
+<p><strong>Why it works or doesn't:</strong> [1-2 specific sentences]</p>
+Then add a table: Angle | Who's using it | Why it converts here | Opportunity for this client
+
+2. 🎯 Gaps & Entry Opportunities
+Which angles no competitor clearly owns. Which audience segments are ignored. What's overused. The strongest positioning opportunity. End with:
+<div class="trig">RECOMMENDED ENTRY ANGLE: [One paragraph, one position, no hedging]</div>
+
+3. 💥 Pain Point Deep Dive
+For each pain point (and any others relevant to this niche):
+<h4>Pain: [PAIN]</h4>
+<p><strong>What they say:</strong> [exact language from real online discussions]</p>
+<p><strong>What they feel underneath:</strong> [deeper emotional driver — the fear or shame]</p>
+<p><strong>Why current solutions fail:</strong> [specific reason existing options don't fix this]</p>
+
+4. 🗣️ Customer Language Library
+14+ phrases from how this audience actually talks online. Use:
+<div class="hook"><span class="hook-tag">[TAG]</span><span class="hook-text">[exact phrase]</span></div>
+Tags: PAIN, DESIRE, OBJECTION, FRUSTRATION, DREAM, TRUST SIGNAL
+
+5. 📡 Social Listening
+3 recurring discussion themes. Top 5 objections before buying (<ul><li>). Trust signals that move people toward purchase. High-engagement content angles. Language patterns worth mirroring.
+
+6. 🧠 Buyer Psychology
+<div class="mg"><div class="mc"><span class="mc-v">[VALUE]</span><span class="mc-l">[LABEL]</span></div> × 3</div>
+Primary desire. Primary fear. Hidden objections. Proof that removes skepticism. The identity gap (who they are vs who they want to be).
+
+7. 💡 Market Opportunities
+Underserved segments. Messaging angles nobody owns. Price sensitivity. Switching triggers. Strongest emotional hook.
+
+8. 📊 Strategic Summary
+Table: Priority | Angle | Why it works | Funnel Stage
+Then: <div class="trig">POSITIONING STATEMENT: [one deployment-ready sentence]</div>
+3 credibility elements that convert most reliably.
+
+Every insight specific to ${S.client.name}. Not generic.`;
+}
+
+// ═══════════════════════════════════
+//  FEATURE: STRATEGY
+// ═══════════════════════════════════
+async function runStrategy(){
+  const daily=g('b_daily');
+  const funnelLabel={tof:'TOF only',mof:'TOF + MOF',full:'TOF + MOF + BOF'}[S.funnel]||'TOF only';
+  const prevStr=S.prev==='yes'?`PREVIOUS CAMPAIGN DATA:
+Objective: ${g('p_obj')} | Budget: ${g('p_budget')}
+Campaign stats: ${g('p_camp')}
+Ad set stats: ${g('p_adset')}
+Ad stats: ${g('p_ads')}
+Best audiences: ${g('p_bestaud')} | Best formats: ${g('p_bestfmt')}
+Best copy: ${g('p_bestcopy')} | What failed: ${g('p_failed')}`:'No previous campaign data.';
+
+  showLoad('Building your Meta Ads Strategy…','Benchmarking your niche, structuring campaigns, building your roadmap.',[
+    'Pulling industry benchmarks for this niche',
+    'Running budget intelligence check',
+    'Assessing funnel readiness',
+    'Designing campaign & audience structure',
+    'Defining creative angle strategy',
+    'Setting kill/scale thresholds',
+    'Writing 30-day execution roadmap'
+  ]);
+
+  const prompt=`Generate a complete Meta Ads Strategy.
+
+${clientCtx()}
+DAILY BUDGET: $${daily}/day
+OBJECTIVE: ${S.obj}
+ACTIVE FUNNELS: ${funnelLabel}
+${prevStr}
+
+Output HTML using ONLY these CSS classes. No markdown.
+
+Strategy blocks:
+<div class="sb"><div class="sb-hd"><div class="sb-num">[##]</div><div class="sb-ttl">[TITLE]</div></div><div class="sb-body">[content]</div></div>
+
+Benchmarks:
+<div class="bench"><div class="bench-t">📊 Benchmarks — [Niche]</div><div class="bench-g"><div class="bench-item"><span class="bench-v">[V]</span><span class="bench-l">[L]</span></div>×3</div></div>
+
+<div class="warn">⚠️ [warning]</div>  <div class="info-box">💡 [info]</div>
+
+Build ALL sections:
+1. Budget Intelligence — benchmarks table, what $${daily}/day realistically achieves (impressions/clicks/leads per week), can it exit learning phase? Budget split for ${funnelLabel} (TOF only=100%, TOF+MOF=90/10, full=70/10/20).
+2. Funnel Stage Assessment — where this audience sits, justify the entry point for this specific niche and offer.
+3. Campaign Objective — confirm or challenge ${S.obj}. Exact Meta Ads Manager selection. What NOT to use and why.
+4. Campaign Structure — table: Stage | Objective | Daily Budget | Audience Strategy | Ad Formats | Ad Count
+5. Creative Angle Strategy — 4 angles with rationale. For each: <div class="trig">[Example hook written as real ad text]</div>
+6. Testing Framework — Phase 1 (days 1-14). Decision table: Signal | Action (5 rows). Phase 2 (days 15-30).
+7. 30-Day Roadmap — table: Week | Focus | Specific Actions | Success Metric
+${S.prev==='yes'?'8. Previous Campaign Analysis — what to keep, what to kill (with exact reasons from the data), what to test next, audience insights, creative insights.':''}
+
+Entirely specific to ${S.client.name}. Not generic.`;
+
+  try{
+    const html=await callAI(prompt);
+    await sleep(1000);hideLoad();
+    S.reports.strategy=html;
+    document.getElementById('out_strategy').innerHTML=html;
+    buildWhatNext('p3','wnext_strategy',['copy','brief','research']);
+    go('p3');
+    onSessionComplete();
+    toast('Strategy ready ✓');
+  }catch(e){hideLoad();toast('Error: '+e.message,'err');}
+}
+
+// ═══════════════════════════════════
+//  FEATURE: COPY
+// ═══════════════════════════════════
+async function runCopy(){
+  showLoad('Writing your copy package…','Hormozi copies, image ads, and video scripts.',[
+    'Writing Hormozi-style ad copies (5 angles)',
+    'Writing 10 image ad text variations',
+    'Writing 5 video scripts with production direction'
+  ]);
+  const cf=S.copyFunnel||'all';
+  const ctx=clientCtx();
+  const funnels=cf==='all'?['TOF','MOF','BOF']:[cf.toUpperCase()];
+
+  try{
+    const [hormoziHtml,imageHtml,videoHtml]=await Promise.all([
+      genHormoziCopies(ctx,funnels),
+      genImageAds(ctx,funnels),
+      genVideoScripts(ctx,funnels)
+    ]);
+    await sleep(600);hideLoad();
+    S.reports.copy={hormozi:hormoziHtml,imageads:imageHtml,videos:videoHtml};
+
+    // Build tabs based on what was generated
+    const tabs=[{id:'hormozi',label:'🎯 Ad Copies',html:hormoziHtml},{id:'imageads',label:'🖼️ Image Ads',html:imageHtml},{id:'videos',label:'🎬 Video Scripts',html:videoHtml}];
+    const tabBar=document.getElementById('copyTabs');
+    const panel=document.getElementById('copy_panel');
+    tabBar.innerHTML=tabs.map((t,i)=>`<button class="ftab ${i===0?'on':''}" onclick="switchCopyTab('${t.id}',this)">${t.label}</button>`).join('');
+    S.copyTabs={hormozi:hormoziHtml,imageads:imageHtml,videos:videoHtml};
+    S.activeTab='hormozi';
+    panel.innerHTML=hormoziHtml;
+
+    buildWhatNext('p4','wnext_copy',['brief','strategy','research']);
+    go('p4');
+    onSessionComplete();
+    toast('Copy package ready ✓');
+  }catch(e){hideLoad();toast('Error: '+e.message,'err');}
+}
+
+function switchCopyTab(tabId,btn){
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  S.activeTab=tabId;
+  document.getElementById('copy_panel').innerHTML=S.copyTabs[tabId]||'';
+}
+
+async function genHormoziCopies(ctx,funnels){
+  return callAI(`${ctx}
+FUNNEL STAGES: ${funnels.join(', ')}
+
+Generate 5 Hormozi Hook → Meat → CTA ad copies. One per angle: Problem Reframe · Specific Pain · Social Proof · Objection-First · Cost of Inaction.
+
+RULES:
+- Hook: 1-2 lines. Stops the scroll. Zero warm-up. 0-1 emoji if it adds punch.
+- Meat: 2-4 lines. One of 4 levers (Do/Don't → More/Less good/bad). One specific detail: number, timeframe, scenario. Contractions required. Short sentences.
+- CTA: 1 line. Specific. 0-1 directional emoji (✅ ➡️) — not mandatory.
+- Max 2 emojis per ad total. The copy must work without them.
+- Every word tied to this client's actual offer and audience.
+
+HTML:
+<div class="cc">
+  <div class="cc-hd"><span class="cc-angle">Angle: [NAME]</span><span class="cc-type">[FUNNEL] | [Format]</span></div>
+  <div class="cc-body">
+    <div class="cc-part"><span class="cc-pl">🪝 Hook</span><div class="cc-pv">[HOOK]</div></div>
+    <div class="cc-part"><span class="cc-pl">💪 Meat</span><div class="cc-pv">[MEAT]</div></div>
+    <div class="cc-part"><span class="cc-pl">📣 CTA</span><div class="cc-pv">[CTA]</div></div>
+  </div>
+  <div class="cc-foot"><button class="btn btn-sm btn-g" onclick="cpyText(this)">Copy</button></div>
+</div>`);
+}
+
+async function genImageAds(ctx,funnels){
+  return callAI(`${ctx}
+FUNNEL STAGES: ${funnels.join(', ')}
+
+Generate 10 image ad text variations (text that appears ON the image).
+Rules: 1-3 lines max · 3-10 words per line · one idea per ad · different angle each time · human tone.
+0-1 emoji maximum per variation, first line only.
+Angles: Problem Reframe · Specific Pain · Social Proof · Objection-First · Cost of Inaction · Emotional Identity · Urgency · FOMO · Risk Reversal · Direct Offer
+
+HTML:
+<div class="iac">
+  <div class="iac-hd"><span class="iac-angle">[ANGLE]</span><span class="iac-stage">[FUNNEL]</span></div>
+  <div class="iac-body">
+    <div class="iac-line">[LINE 1]</div>
+    <div class="iac-line">[LINE 2]</div>
+    <div class="iac-line">[LINE 3]</div>
+  </div>
+</div>`);
+}
+
+async function genVideoScripts(ctx,funnels){
+  return callAI(`${ctx}
+FUNNEL STAGES: ${funnels.join(', ')}
+
+Generate 5 video scripts (15-60 sec each). Different angle and funnel each.
+ZERO emojis. Written for spoken delivery. Contractions. Short sentences. Real language.
+
+HTML:
+<div class="vsc">
+  <div class="vsc-hd">
+    <div class="vsc-title">[ANGLE NAME]</div>
+    <div class="vsc-meta"><div class="fbadge [f-tof/f-mof/f-bof]">[STAGE]</div><span class="vsc-dur">~[X] sec</span></div>
+  </div>
+  <div class="vsc-body">
+    <div class="vsc-beat"><span class="vsc-beat-label">Hook (0:00–0:04)</span><div class="vsc-spoken">[Exact spoken words — stops scroll instantly]</div><div class="vsc-onscreen">[On-screen text]</div><div class="vsc-direction">[Visual direction]</div></div>
+    <div class="vsc-beat"><span class="vsc-beat-label">Problem (0:04–0:15)</span><div class="vsc-spoken">[Specific relatable scenario — make them feel it]</div><div class="vsc-direction">[Visual direction]</div></div>
+    <div class="vsc-beat"><span class="vsc-beat-label">Solution (0:15–0:35)</span><div class="vsc-spoken">[Mechanism simply explained — what makes this different]</div><div class="vsc-onscreen">[Key benefit]</div><div class="vsc-direction">[Visual direction]</div></div>
+    <div class="vsc-beat"><span class="vsc-beat-label">Proof (0:35–0:50)</span><div class="vsc-spoken">[Specific result or transformation — real credibility]</div><div class="vsc-onscreen">[Proof element]</div></div>
+    <div class="vsc-beat"><span class="vsc-beat-label">CTA (0:50–end)</span><div class="vsc-spoken">[One clear action]</div><div class="vsc-onscreen">[CTA text]</div><div class="vsc-direction">[Creator note: who should film this, what to avoid]</div></div>
+  </div>
+</div>`);
+}
+
+// ═══════════════════════════════════
+//  FEATURE: BRIEF
+// ═══════════════════════════════════
+async function runBrief(){
+  showLoad('Building creative brief…','15-theme brief with visual direction and image text.',[
+    'Analysing brand positioning and visual style',
+    'Building 15 ad variation themes',
+    'Writing image text for each theme',
+    'Creating immediate action plan'
+  ]);
+  const ctx=clientCtx();
+  try{
+    const html=await callAI(briefPrompt(ctx));
+    await sleep(800);hideLoad();
+    S.reports.brief=html;
+    document.getElementById('out_brief').innerHTML=html;
+    buildWhatNext('p5','wnext_brief',['copy','strategy','research']);
+    go('p5');
+    onSessionComplete();
+    toast('Creative brief ready ✓');
+  }catch(e){hideLoad();toast('Error: '+e.message,'err');}
+}
+
+function briefPrompt(ctx){
+  return`Generate a complete Static Ad Creative Brief.
+${ctx}
+
+Output HTML using only provided classes. No markdown. Zero emojis — this is a professional production document.
+
+<div class="sb"><div class="sb-hd"><div class="sb-num">ℹ</div><div class="sb-ttl">Brand Context</div></div>
+<div class="sb-body"><table><tbody>
+<tr><td><strong>Business</strong></td><td>${S.client.name}</td></tr>
+<tr><td><strong>Niche</strong></td><td>${S.client.niche}</td></tr>
+<tr><td><strong>Audience</strong></td><td>${S.client.audience}</td></tr>
+<tr><td><strong>Core Offer</strong></td><td>${S.client.offer}</td></tr>
+<tr><td><strong>USP</strong></td><td>${S.client.usp||'See positioning statement'}</td></tr>
+<tr><td><strong>CTA</strong></td><td>${S.client.cta}</td></tr>
+<tr><td><strong>Geography</strong></td><td>${S.client.geo||'Not specified'}</td></tr>
+<tr><td><strong>Competitors</strong></td><td>${S.client.competitors||'None specified'}</td></tr>
+</tbody></table></div></div>
+
+<div class="sb"><div class="sb-hd"><div class="sb-num">🎨</div><div class="sb-ttl">Visual Direction</div></div>
+<div class="sb-body"><p>[Based on the niche, audience, and geography: recommended colour palette, visual tone, photography style, typography approach. What to avoid. Specific enough that a designer executes without a call.]</p></div></div>
+
+<div class="sb"><div class="sb-hd"><div class="sb-num">🗂</div><div class="sb-ttl">15 Ad Variation Themes</div></div>
+<div class="sb-body">
+<table class="brief-table">
+<thead><tr><th>#</th><th>Theme</th><th>Stage</th><th>Visual Concept (specific to this client)</th><th>Image Text (max 7 words)</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Problem Awareness</td><td class="stage-tof">TOF</td><td>[specific visual for ${S.client.name}]</td><td>[on-image text]</td></tr>
+<tr><td>2</td><td>Solution Reveal</td><td class="stage-tof">TOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>3</td><td>Process Showcase</td><td class="stage-tof">TOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>4</td><td>Step-by-Step Checklist</td><td class="stage-tof">TOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>5</td><td>Beginner-Friendly</td><td class="stage-tof">TOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>6</td><td>Social Proof</td><td class="stage-mof">MOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>7</td><td>Risk Reversal</td><td class="stage-mof">MOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>8</td><td>Cost of Inaction</td><td class="stage-mof">MOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>9</td><td>Before & After</td><td class="stage-mof">MOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>10</td><td>Comparison</td><td class="stage-mof">MOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>11</td><td>FAQ / Objection Crusher</td><td class="stage-mof">MOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>12</td><td>Urgency / Scarcity</td><td class="stage-bof">BOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>13</td><td>FOMO</td><td class="stage-bof">BOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>14</td><td>Direct Offer</td><td class="stage-bof">BOF</td><td>[specific]</td><td>[text]</td></tr>
+<tr><td>15</td><td>Outcome Visualisation</td><td class="stage-bof">BOF</td><td>[specific]</td><td>[text]</td></tr>
+</tbody></table>
+<p style="font-size:11px;color:rgba(250,249,245,.3);margin-top:10px;">All visual concepts and image text must be specific to ${S.client.name} — not generic templates.</p>
+</div></div>
+
+<div class="sb"><div class="sb-hd"><div class="sb-num">📐</div><div class="sb-ttl">Technical Specs</div></div>
+<div class="sb-body"><ul><li>Feed: 1080×1080px square</li><li>Stories/Reels: 1080×1920px portrait</li><li>Consistent branding across all 15</li><li>Readable text overlays — no small fonts on busy backgrounds</li><li>Each ad communicates one idea independently</li><li>Label each file: ThemeName_FunnelStage</li></ul></div></div>
+
+<div class="sb"><div class="sb-hd"><div class="sb-num">⚡</div><div class="sb-ttl">Next 7 Days — Action Plan</div></div>
+<div class="sb-body">
+<p><strong>Action 1:</strong> [Specific to this client — name the campaign, audience, and exact first creative to launch]</p>
+<p><strong>Action 2:</strong> [Specific — what to produce or set up in days 2-4]</p>
+<p><strong>Action 3:</strong> [Specific — what to monitor or optimise by day 7]</p>
+</div></div>`;
+}
+
+// ═══════════════════════════════════
+//  FEATURE: FUNNEL CHECK
+// ═══════════════════════════════════
+async function runFunnelCheck(){
+  showLoad('Assessing funnel readiness…','Checking what stages are ready and what\'s needed to unlock them.',[
+    'Evaluating TOF readiness',
+    'Checking MOF requirements',
+    'Checking BOF requirements',
+    'Building recommendations'
+  ]);
+  const ctx=clientCtx();
+  try{
+    const html=await callAI(`You are assessing Meta ads funnel readiness for this client.
+${ctx}
+
+Generate a funnel readiness assessment. Output HTML using only provided CSS classes. No markdown.
+
+For each funnel stage, produce a strategy block with honest assessment:
+
+<div class="sb">
+  <div class="sb-hd">
+    <div class="sb-num">[🟢/🟡/🔴]</div>
+    <div class="sb-ttl">[STAGE NAME] — [READY / REQUIRES SETUP / NOT YET]</div>
+  </div>
+  <div class="sb-body">
+    <p><strong>Status:</strong> [one honest sentence on current readiness]</p>
+    <p><strong>Requirements:</strong> [what's needed to run this stage — be specific]</p>
+    <p><strong>What happens if run without meeting requirements:</strong> [honest explanation of wasted budget]</p>
+    <p><strong>Recommendation:</strong> [exactly what to do]</p>
+  </div>
+</div>
+
+Assess: TOF (always at least partial readiness), MOF (needs 2+ of: 2+ weeks prior ads, 500+ monthly visitors, active FB/IG page, 500+ email list, prior custom audiences), BOF (needs 2+ of: Pixel installed, 300+ monthly visitors, 300+ video views/engagements past 30 days, existing unconverted leads).
+
+Then add a summary block with recommended launch sequence for ${S.client.name} specifically.`);
+    await sleep(600);hideLoad();
+    S.reports.funnel=html;
+    document.getElementById('out_funnel').innerHTML=html;
+    buildWhatNext('p6','wnext_funnel',['strategy','research','copy']);
+    go('p6');
+    onSessionComplete();
+    toast('Funnel assessment ready ✓');
+  }catch(e){hideLoad();toast('Error: '+e.message,'err');}
+}
+
+// ═══════════════════════════════════
+//  FEATURE: FULL PACKAGE
+// ═══════════════════════════════════
+async function runFull(){
+  const daily=g('b_daily');
+  const funnelLabel={tof:'TOF only',mof:'TOF + MOF',full:'TOF + MOF + BOF'}[S.funnel]||'TOF only';
+  showLoad('Running full funnel package…','One intake. Everything.',[
+    'Running competitor & market research',
+    'Building ad strategy with benchmarks',
+    'Writing Hormozi-style ad copies',
+    'Writing video scripts',
+    'Building 15-theme creative brief'
+  ]);
+  const ctx=clientCtx();
+  try{
+    const [resHtml,stratHtml,hormoziHtml,videoHtml,briefHtml]=await Promise.all([
+      callAI(researchPrompt()),
+      callAI(`Generate complete Meta Ads Strategy.\n${ctx}\nBudget: $${daily}/day | Objective: ${S.obj} | Funnels: ${funnelLabel}\n${S.prev==='yes'?`Previous: Obj:${g('p_obj')} Budget:${g('p_budget')} Camp:${g('p_camp')} Adsets:${g('p_adset')} Ads:${g('p_ads')} BestAud:${g('p_bestaud')} BestFmt:${g('p_bestfmt')} BestCopy:${g('p_bestcopy')} Failed:${g('p_failed')}`:'No previous data.'}\nOutput HTML using sb/bench/warn/info-box classes. All 8 strategy sections. Specific to this client.`),
+      genHormoziCopies(ctx,['TOF','MOF','BOF']),
+      genVideoScripts(ctx,['TOF','MOF','BOF']),
+      callAI(briefPrompt(ctx))
+    ]);
+    await sleep(800);hideLoad();
+    S.reports={research:resHtml,strategy:stratHtml,copy:{hormozi:hormoziHtml,videos:videoHtml},brief:briefHtml};
+    document.getElementById('out_research').innerHTML=resHtml;
+    document.getElementById('out_strategy').innerHTML=stratHtml;
+    S.copyTabs={hormozi:hormoziHtml,videos:videoHtml};
+    S.activeTab='hormozi';
+    const tabBar=document.getElementById('copyTabs');
+    tabBar.innerHTML=`<button class="ftab on" onclick="switchCopyTab('hormozi',this)">🎯 Ad Copies</button><button class="ftab" onclick="switchCopyTab('videos',this)">🎬 Video Scripts</button>`;
+    document.getElementById('copy_panel').innerHTML=hormoziHtml;
+    document.getElementById('out_brief').innerHTML=briefHtml;
+    buildWhatNext('p2','wnext_research',[]);
+    go('p2');
+    onSessionComplete();
+    toast('Full package complete ✓');
+  }catch(e){hideLoad();toast('Error: '+e.message,'err');}
+}
+
+// ═══════════════════════════════════
+//  WHAT'S NEXT
+// ═══════════════════════════════════
+function buildWhatNext(currentPage,containerId,featureIds){
+  const c=document.getElementById(containerId);
+  if(!featureIds.length){c.innerHTML='';return;}
+  const fm=FEAT_META;
+  c.innerHTML=`<div class="wnext">
+    <div class="wnext-title">What do you want to build next?</div>
+    <div class="wnext-sub">Client details are already loaded. Pick an output and Fabro generates it immediately.</div>
+    <div class="wnext-cards">
+      ${featureIds.map(fid=>`
+      <div class="wnext-card" onclick="launchFromOutput('${fid}')">
+        <span class="wnc-icon">${fm[fid]?.icon||'⚡'}</span>
+        <div class="wnc-name">${fm[fid]?.name||fid}</div>
+        <div class="wnc-desc">${getWnDesc(fid)}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function getWnDesc(fid){
+  const d={
+    research:'Know exactly what the market responds to before spending a dollar.',
+    strategy:'Full campaign blueprint — budget benchmarked, structure locked, thresholds set.',
+    copy:'Scroll-stopping hooks, image ad texts, and full video scripts. All tied to real buying triggers.',
+    brief:'15 ad themes with exact visual direction. Ready for your designer today.',
+    funnel:'Find out which stages are ready to run — and what\'s needed to unlock the rest.'
+  };
+  return d[fid]||'';
+}
+
+function launchFromOutput(feat){
+  // Pre-load the feature but skip intake if client data is complete
+  S.feature=feat;
+  const req=FEAT_REQ[feat]||[];
+  const allFilled=req.every(f=>S.client[f]||g('f_'+f));
+  if(allFilled&&feat!=='strategy'&&feat!=='full'){
+    // Can go straight to generating
+    collectClient();
+    runGenerate();
+  }else{
+    // Need additional input (budget/objective for strategy, etc.)
+    buildIntakePage(feat);
+    // Pre-fill form with existing client data
+    Object.entries(S.client).forEach(([k,v])=>{
+      const el=document.getElementById('f_'+k);
+      if(el&&v&&v!=='none')el.value=v;
+    });
+    go('p1');
+  }
+}
+
+// ═══════════════════════════════════
+//  UTILITIES
+// ═══════════════════════════════════
+function toggleAcc(el){el.classList.toggle('open');el.nextElementSibling.classList.toggle('open');}
+
+function cpyText(btn){
+  const card=btn.closest('.cc');
+  const text=[...card.querySelectorAll('.cc-pv')].map(e=>e.textContent).join('\n\n');
+  navigator.clipboard.writeText(text).then(()=>{const o=btn.textContent;btn.textContent='Copied!';setTimeout(()=>btn.textContent=o,1800);}).catch(()=>toast('Select text manually','info'));
+}
+
+function dlPDF(type){
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  doc.setFillColor(20,20,19);doc.rect(0,0,210,40,'F');
+  doc.setTextColor(250,249,245);doc.setFontSize(22);doc.setFont('helvetica','bold');doc.text('FABRO',14,18);
+  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(196,90,46);doc.text('CRAFT YOUR FORTUNE',14,27);
+  const titles={research:'Competitor Intelligence & Market Research',strategy:'Meta Ads Strategy',copy:'Ad Copy Package',brief:'Static Ad Creative Brief'};
+  doc.setTextColor(250,249,245);doc.setFontSize(15);doc.setFont('helvetica','bold');doc.text(titles[type]||'Report',105,22,{align:'center'});
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(160,152,144);doc.text(`${S.client.name||'Client'} — ${new Date().toLocaleDateString()}`,105,30,{align:'center'});
+  const elIds={research:'out_research',strategy:'out_strategy',copy:'copy_panel',brief:'out_brief'};
+  const el=document.getElementById(elIds[type]||'out_research');
+  const rawText=el?el.innerText:'Report content — view in app.';
+  doc.setTextColor(50,45,40);doc.setFontSize(9);doc.setFont('helvetica','normal');
+  const lines=doc.splitTextToSize(rawText,180);let y=50;
+  lines.forEach(l=>{if(y>278){doc.addPage();doc.setFillColor(20,20,19);doc.rect(0,0,210,10,'F');doc.setTextColor(196,90,46);doc.setFontSize(6);doc.text('FABRO',14,7);y=18;}doc.setTextColor(50,45,40);doc.setFontSize(9);doc.text(l,15,y);y+=4.8;});
+  const total=doc.getNumberOfPages();for(let i=1;i<=total;i++){doc.setPage(i);doc.setFillColor(20,20,19);doc.rect(0,285,210,12,'F');doc.setTextColor(90,85,80);doc.setFontSize(7);doc.text(`Page ${i} of ${total}  ·  Fabro  ·  Craft Your Fortune`,105,292,{align:'center'});}
+  doc.save(`fabro-${type}-${(S.client.name||'client').toLowerCase().replace(/\s+/g,'-')}.pdf`);
+  toast('PDF downloaded ✓');
+}
+
+function toast(msg,type='ok',dur=3500){
+  const t=document.getElementById('toast');
+  const dot=document.getElementById('toastDot');
+  document.getElementById('toastMsg').textContent=msg;
+  dot.className='toast-d '+(type==='err'?'err':type==='info'?'info':'ok');
+  t.classList.add('on');setTimeout(()=>t.classList.remove('on'),dur);
+}
+
+// ── STARTUP ──
+// Version reset: clears stale localStorage data from older versions
+(function versionReset(){
+  const CURRENT='fabro_v4';
+  if(localStorage.getItem('fabro_app_version')!==CURRENT){
+    ['fabro_lead','fabro_sessions_used','fabro_redirected_stripe'].forEach(k=>localStorage.removeItem(k));
+    localStorage.setItem('fabro_app_version',CURRENT);
+    // Note: fabro_subscribed and fabro_paid are intentionally kept
+  }
+})();
+checkStripeReturn();
+initLeadGate();
+</script>
+
+</body>
+</html>
